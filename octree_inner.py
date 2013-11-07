@@ -70,6 +70,9 @@ class Empty(Tree):
     def __eq__(self,other):
         return isinstance(other,Empty)
 
+    def __hash__(self):
+        return hash((Empty,))
+
     def insert(self, bounds, coords, data):
         return Singleton(coords, data)
 
@@ -101,6 +104,9 @@ class Singleton(Tree):
 
     def __eq__(self,other):
         return isinstance(other,Singleton) and self.coords == other.coords and self.data == other.data
+
+    def __hash__(self):
+        return hash((Singleton,coords,data))
 
     def insert(self, bounds, coords, data):
         if self.coords == coords:
@@ -154,6 +160,9 @@ class Node(Tree):
 
     def __eq__(self,other):
         return isinstance(other,Node) and self.content_array() == other.content_array()
+
+    def __hash__(self):
+        return hash((Node,content))
 
     def content_array(self):
         return [[list(b) for b in a] for a in self.content]

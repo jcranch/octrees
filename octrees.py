@@ -1,8 +1,6 @@
 # A simple octree library
 #
 # James Cranch, 2013
-#
-# *add a licence*
 
 
 # to do
