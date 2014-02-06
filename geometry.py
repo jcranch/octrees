@@ -127,6 +127,31 @@ def euclidean_point_box(p,b):
     return euclidean_point_point(p,nearest_point_in_box(p,b))
 
 
+def euclidean_box_box(b1,b2):
+    "The euclidean distance between two boxes"
+    ((minx1,maxx1), (miny1,maxy1), (minz1,maxz1)) = b1
+    ((minx2,maxx2), (miny2,maxy2), (minz2,maxz2)) = b2
+    if maxx1 < minx2:
+        x = minx2 - maxx1
+    elif maxx2 < minx1:
+        x = minx1 - maxx2
+    else:
+        x = 0
+    if maxy1 < miny2:
+        y = miny2 - maxy1
+    elif maxy2 < miny1:
+        y = miny1 - maxy2
+    else:
+        y = 0
+    if maxz1 < minz2:
+        z = minz2 - maxz1
+    elif maxz2 < minz1:
+        z = minz1 - maxz2
+    else:
+        z = 0
+    return sqrt(x*x+y*y+z*z)
+
+
 def convex_box_deform(f,b):
     """
     Given a function f taking points to points, and a box b, returns

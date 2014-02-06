@@ -198,6 +198,63 @@ class Octree():
             yield t
 
     
+    def by_proximity(self, other):
+        """
+        Given two octrees, generate points of the first in order of
+        increasing distance from the second.
+
+        Yields tuples of the form (distance, coords1, coords2, data1,
+        data2).
+        """
+        def pointscore(p):
+            t = other.nearest_to_point(p)
+            if t is None:
+                return None
+            else:
+                return t
+        def nearest_to_box(b):
+            for t in other.by_score(lambda p:euclidean_point_box(p,b), lambda b2:euclidean_box_box(b2,b)):
+                return t
+        def boxscore(b):
+            t = nearest_to_box(b)
+            if t is None:
+                return None
+            else:
+                return t
+        for ((d,c2,v2),c1,v1) in self.by_score(pointscore,boxscore):
+            yield (d,c1,c2,v1,v2)
+
+
+    def by_proximity_bounded(self, other, epsilon):
+        """
+        Given two octrees, generate points of the first in increasing
+        order of distance from the second, where that distance is less
+        than epsilon. This is somewhat faster than using by_proximity
+        and stopping once the distance exceeds epsilon.
+        """
+        def pointscore(p):
+            t = other.nearest_to_point(p)
+            if t is None:
+                return None
+            elif t[0] > epsilon:
+                return None
+            else:
+                return t
+        def nearest_to_box(b):
+            for t in other.by_score(lambda p:euclidean_point_box(p,b), lambda b2:euclidean_box_box(b2,b)):
+                return t
+        def boxscore(b):
+            t = nearest_to_box(b)
+            if t is None:
+                return None
+            elif t[0] > epsilon:
+                return None
+            else:
+                return t
+        for ((d,c2,v2),c1,v1) in self.by_score(pointscore,boxscore):
+            yield (d,c1,c2,v1,v2)
+
+
     def deform(self, point_function, bounds=None, box_function=None):
         """
         Moves all the points according to point_function, assumed to

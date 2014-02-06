@@ -135,5 +135,31 @@ class GeometricTests(TestCase):
 
 
 
+class BinaryTests(TestCase):
+
+    def setUp(self):
+        self.coords1 = set((sin(0.1*t), sin(0.2*t), sin(0.3*t)) for t in xrange(50))
+        self.o1 = Octree(((-1.0, 1.0),(-1.0, 1.0),(-1.0, 1.0)))
+        self.o1.extend((p,None) for p in self.coords1)
+
+        self.coords2 = set((sin(0.1*t), sin(0.2*t), sin(0.3*t)) for t in xrange(150,200))
+        self.o2 = Octree(((-1.0, 1.0),(-1.0, 1.0),(-1.0, 1.0)))
+        self.o2.extend((p,None) for p in self.coords2)
+
+    def test_proximity(self):
+        l1 = []
+        for c1 in self.coords1:
+            (d,c2,_) = self.o2.nearest_to_point(c1)
+            l1.append((d,c1,c2,None,None))
+        l1.sort()
+        l2 = list(self.o1.by_proximity(self.o2))
+        self.assertEqual(l1,l2)
+
+        l1b = list(t for t in l1 if t[0]<0.1)
+        l2b = list(self.o1.by_proximity_bounded(self.o2,0.1))
+        self.assertEqual(l1b,l2b)
+
+
+
 if __name__ == '__main__':
     main()
