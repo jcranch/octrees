@@ -5,6 +5,8 @@ own bounds.
 
 The user should probably not ever want to import or use this code
 directly.
+
+(C) James Cranch 2013-2014
 """
 
 import heapq
@@ -36,7 +38,10 @@ class Tree():
     def union(self, other, bounds, swapped=False):
         raise NotImplementedError()
 
-    def rebound(self, other, bounds, swapped=False):
+    def rebound(self, oldbounds, newbounds):
+        raise NotImplementedError()
+
+    def deform(self, oldbounds, newbounds, point_fn, box_fn):
         raise NotImplementedError()
 
     def smartnode(self, data):
@@ -91,6 +96,9 @@ class Empty(Tree):
     def rebound(self, oldbounds, newbounds):
         return self
 
+    def deform(self, oldbounds, newbounds, point_fn, box_fn):
+        return self
+
 
 
 class Singleton(Tree):
@@ -137,6 +145,13 @@ class Singleton(Tree):
     def rebound(self, oldbounds, newbounds):
         if point_in_box(self.coords, newbounds):
             return self
+        else:
+            return Empty()
+
+    def deform(self, oldbounds, newbounds, point_fn, box_fn):
+        coords = point_fn(self.coords)
+        if point_in_box(coords, newbounds):
+            return Singleton(coords, self.data)
         else:
             return Empty()
 
@@ -213,3 +228,11 @@ class Node(Tree):
             return Empty()
         else:
             return reduce(lambda x,y:x.union(y,newbounds), (x.rebound(b,newbounds) for (b,x) in self.children(oldbounds)))
+
+    def deform(self, oldbounds, newbounds, point_fn, box_fn):
+        if box_contains(oldbounds, newbounds):
+            return Node([self.deform(oldbounds, b, point_fn, box_fn) for b in subboxes(newbounds)])
+        elif boxes_disjoint(box_fn(oldbounds), newbounds):
+            return Empty()
+        else:
+            return reduce(lambda x,y:x.union(y,newbounds), (x.deform(b,newbounds,point_fn,box_fn) for (b,x) in self.children(oldbounds)))

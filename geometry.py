@@ -1,4 +1,8 @@
-# Some supporting 3D geometric code
+"""
+Some supporting 3D geometric code
+
+(C) James Cranch 2013-2014
+"""
 
 from math import sqrt
 
@@ -121,3 +125,22 @@ def nearest_point_in_box(p,b):
 def euclidean_point_box(p,b):
     "The euclidean distance between p and a box b"
     return euclidean_point_point(p,nearest_point_in_box(p,b))
+
+
+def convex_box_deform(f,b):
+    """
+    Given a function f taking points to points, and a box b, returns
+    the box containing f applied to the vertices of b.
+    """
+    l = [f(p) for p in vertices(b)]
+    minx = min(q[0] for q in l)
+    maxx = max(q[0] for q in l)
+    miny = min(q[1] for q in l)
+    maxy = max(q[1] for q in l)
+    minz = min(q[2] for q in l)
+    maxz = max(q[2] for q in l)
+    return ((minx,maxx),(miny,maxy),(minz,maxz))
+
+
+def matrix_action(m,p):
+    return tuple(sum(m[i][j]*p[j] for j in xrange(3)) for i in xrange(3))

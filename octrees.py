@@ -1,7 +1,8 @@
-# A simple octree library
-#
-# James Cranch, 2013
+"""
+A simple octree library
 
+(C) James Cranch 2013-2014
+"""
 
 # to do
 #   points by linear functional
@@ -19,6 +20,10 @@ class Octree():
     """
     Octrees: efficient data structure for data associated with points
     in 3D space.
+
+    Usage:
+        Octree((minx,maxx),(miny,maxy),(minz,maxz))
+    creates an empty octree with bounds as given.
     """
 
     def __init__(self, bounds, tree=Empty()):
@@ -191,4 +196,34 @@ class Octree():
                 return None
         for t in self.by_score(pointscore, boxscore):
             yield t
+
     
+    def deform(self, point_function, bounds=None, box_function=None):
+        """
+        Moves all the points according to point_function, assumed to
+        be a continuous function.
+
+        It also uses box_function to compute a box bounding the image
+        of a given box. If box_function is not given, it assumes that
+        the image of boxes is a convex set.
+
+        One can also give explicit bounds, which by default are
+        obtained by calling box_function on the existing bounds.
+
+        For large octrees and well-behaved functions, this should be
+        significantly faster than repopulating an octree from scratch.
+        """
+
+        if box_function is None:
+            box_function = lambda b: convex_box_deform(point_function, b)
+        if bounds is None:
+            bounds = box_function(self.bounds)
+        return Octree(bounds, self.tree.deform(self.bounds, bounds, point_function, box_function))
+
+    def apply_matrix(self, matrix, bounds=None):
+        """
+        Moves the points according to the given matrix.
+
+        Bounds can be given.
+        """
+        return self.deform(lambda p:matrix_action(matrix,p), bounds)

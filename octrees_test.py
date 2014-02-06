@@ -1,5 +1,8 @@
-# Unit testing for the octrees library
+"""
+Unit testing for the octrees library
 
+(C) James Cranch 2013-2014
+"""
 
 from unittest import TestCase, main
 from math import sin
@@ -118,6 +121,17 @@ class GeometricTests(TestCase):
         self.assertEqual(len(o2), 25)
 
         self.assertEqual(o1.simple_union(o2), self.o)
+
+    def test_matrix(self):
+        m = ((0.123, 0.143, -0.987),(-0.345,0.687,-0.431),(0.361,-0.183,0.781))
+
+        o1 = self.o.apply_matrix(m)
+
+        s = set(matrix_action(m,p) for p in self.coords)
+        self.assertEqual(len(s), len(self.coords))
+
+        s1 = set(c for (_,c,_) in o1.by_distance_from_point((0.123,0.456,0.789)))
+        self.assertEqual(s,s1)
 
 
 
