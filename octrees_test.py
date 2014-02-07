@@ -75,7 +75,7 @@ class GeometricTests(TestCase):
 
         self.assertEqual(self.o.nearest_to_point(p), l1[0], "the nearest point to p should be the first in order of distance from p")
 
-        l3 = list(self.o.near_point(p, 1.3))
+        l3 = list(self.o.by_distance_from_point(p, 1.3))
         self.assertEqual(l3, l1[:len(l3)], "the points near p should be an initial segment of the points in order of distance from p")
 
     def test_embiggen(self):
@@ -164,7 +164,7 @@ class BinaryTests(TestCase):
         self.assertEqual(l1,l2)
 
         l1b = list(t for t in l1 if t[0]<0.1)
-        l2b = list(self.o1.by_proximity_bounded(self.o2,0.1))
+        l2b = list(self.o1.by_proximity(self.o2,0.1))
         self.assertEqual(l1b,l2b)
 
     def test_pairs_by_distance(self):

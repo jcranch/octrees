@@ -166,12 +166,23 @@ class Octree():
                 yield (score,location,stuff)
 
 
-    def by_distance_from_point(self, p):
+    def by_distance_from_point(self, p, epsilon=None):
         """
         Return points in order of distance from p, in the form
         (distance, coords, value).
+
+        Takes an optional argument epsilon; if this is given, then it
+        stops when the distance exceeds epsilon. This is more
+        efficient than merely truncating the results.
         """
-        for t in self.by_score(lambda q: euclidean_point_point(p,q), lambda b: euclidean_point_box(p,b)):
+        if epsilon is None:
+            p_fn = lambda q: euclidean_point_point(p,q)
+            b_fn = lambda b: euclidean_point_box(p,b)
+        else:
+            p_fn = lambda q: bounding(euclidean_point_point(p,q),epsilon)
+            b_fn = lambda b: bounding(euclidean_point_box(p,b),epsilon)
+            
+        for t in self.by_score(p_fn, b_fn):
             yield t
 
     
@@ -193,27 +204,23 @@ class Octree():
             return t
 
 
-    def near_point(self, p, epsilon):
-        """
-        Return all points within epsilon of p, in the form (distance,
-        coords, value). A little faster than using
-        by_distance_from_point and stopping when satisfied.
-        """
-        for t in self.by_score(lambda q: bounding(euclidean_point_point(p,q),epsilon), lambda b: bounding(euclidean_point_box(p,b),epsilon)):
-            yield t
-
-    
-    def by_proximity(self, other):
+    def by_proximity(self, other, epsilon=None):
         """
         Given two octrees, generate points of the first in order of
         increasing distance from the second.
 
         Yields tuples of the form (distance, coords1, coords2, data1,
         data2).
+
+        If epsilon is given, then it does not return points further
+        apart than epsilon. This can be slightly more efficient than
+        simply stopping once the distances exceed epsilon.
         """
         def pointscore(p):
             t = other.nearest_to_point(p)
             if t is None:
+                return None
+            elif epsilon is not None and t[0] > epsilon:
                 return None
             else:
                 return t
@@ -224,35 +231,7 @@ class Octree():
             t = nearest_to_box(b)
             if t is None:
                 return None
-            else:
-                return t
-        for ((d,c2,v2),c1,v1) in self.by_score(pointscore,boxscore):
-            yield (d,c1,c2,v1,v2)
-
-
-    def by_proximity_bounded(self, other, epsilon):
-        """
-        Given two octrees, generate points of the first in increasing
-        order of distance from the second, where that distance is less
-        than epsilon. This is somewhat faster than using by_proximity
-        and stopping once the distance exceeds epsilon.
-        """
-        def pointscore(p):
-            t = other.nearest_to_point(p)
-            if t is None:
-                return None
-            elif t[0] > epsilon:
-                return None
-            else:
-                return t
-        def nearest_to_box(b):
-            for t in other.by_score(lambda p:euclidean_point_box(p,b), lambda b2:euclidean_box_box(b2,b)):
-                return t
-        def boxscore(b):
-            t = nearest_to_box(b)
-            if t is None:
-                return None
-            elif t[0] > epsilon:
+            elif epsilon is not None and t[0] > epsilon:
                 return None
             else:
                 return t
