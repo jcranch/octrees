@@ -204,6 +204,19 @@ def euclidean_box_box_max(b1,b2):
     return sqrt(x*x+y*y+z*z)
 
 
+def euclidean_box_box_minmax(b1,b2):
+    """
+    The minimum over all points in b1 of the maximum over all points
+    in b2 of the distance.
+    """
+    ((minx1,maxx1), (miny1,maxy1), (minz1,maxz1)) = b1
+    ((minx2,maxx2), (miny2,maxy2), (minz2,maxz2)) = b2
+    x = min(max(abs(minx2-minx1),abs(maxx2-minx1)),max(abs(minx2-maxx1),abs(maxx2-maxx1)))
+    y = min(max(abs(miny2-miny1),abs(maxy2-miny1)),max(abs(miny2-maxy1),abs(maxy2-maxy1)))
+    z = min(max(abs(minz2-minz1),abs(maxz2-minz1)),max(abs(minz2-maxz1),abs(maxz2-maxz1)))
+    return sqrt(x*x+y*y+z*z)
+    
+
 def convex_box_deform(f,b):
     """
     Given a function f taking points to points, and a box b, returns

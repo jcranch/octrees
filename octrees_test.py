@@ -167,6 +167,19 @@ class BinaryTests(TestCase):
         l2b = list(self.o1.by_proximity(self.o2,0.1))
         self.assertEqual(l1b,l2b)
 
+    def test_isolation(self):
+        l1 = []
+        for c1 in self.coords1:
+            (d,c2,_) = self.o2.nearest_to_point(c1)
+            l1.append((d,c1,c2,None,None))
+        l1.sort(reverse=True)
+        l2 = list(self.o1.by_isolation(self.o2))
+        self.assertEqual(l1,l2)
+
+        l1b = list(t for t in l1 if t[0]>0.3)
+        l2b = list(self.o1.by_isolation(self.o2,0.3))
+        self.assertEqual(l1b,l2b)
+
     def test_pairs_by_distance(self):
         l1 = []
         for c1 in self.coords1:

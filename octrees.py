@@ -204,10 +204,29 @@ class Octree():
             return t
 
 
+    def nearest_to_box(self,b):
+        """
+        Return the nearest point to a box, in the form (distance, coords,
+        value).
+        """
+        for t in self.by_score(lambda p:euclidean_point_box(p,b), lambda b2:euclidean_box_box(b2,b)):
+            return t
+
+
+    def nearest_to_box_far_corner(self,b):
+        """
+        Return the point which has the lowest maximum distance to a
+        box, in the form (distance,coords,value).
+        """
+        for t in self.by_score(lambda p:euclidean_point_box_max(p,b), lambda b2:euclidean_box_box_minmax(b2,b)):
+            return t
+
+
     def by_proximity(self, other, epsilon=None):
         """
-        Given two octrees, generate points of the first in order of
-        increasing distance from the second.
+        Given two octrees, return points from the first which are
+        close to some point from the second, in decreasing order of
+        proximity.
 
         Yields tuples of the form (distance, coords1, coords2, data1,
         data2).
@@ -224,11 +243,8 @@ class Octree():
                 return None
             else:
                 return t
-        def nearest_to_box(b):
-            for t in other.by_score(lambda p:euclidean_point_box(p,b), lambda b2:euclidean_box_box(b2,b)):
-                return t
         def boxscore(b):
-            t = nearest_to_box(b)
+            t = other.nearest_to_box(b)
             if t is None:
                 return None
             elif epsilon is not None and t[0] > epsilon:
@@ -237,6 +253,41 @@ class Octree():
                 return t
         for ((d,c2,v2),c1,v1) in self.by_score(pointscore,boxscore):
             yield (d,c1,c2,v1,v2)
+
+
+    def by_isolation(self, other, epsilon=None):
+        """
+        Given two octrees, return points from the first which are far
+        from every point in the second, in increasing order of
+        proximity.
+
+        Yields tuples of the form (distance, coords1, coords2, data1,
+        data2).
+
+        If epsilon is given, it does not return points that are closer
+        than epsilon to the other octree. This is more efficient than
+        simply truncating the output.
+        """
+        def pointscore(p):
+            t = other.nearest_to_point(p)
+            if t is None:
+                return None
+            (s,c,v) = t
+            if epsilon is not None and s < epsilon:
+                return None
+            else:
+                return (-s,c,v)
+        def boxscore(b):
+            t = other.nearest_to_box_far_corner(b)
+            if t is None:
+                return None
+            (s,c,v) = t
+            if epsilon is not None and s < epsilon:
+                return None
+            else:
+                return (-s,c,v)
+        for ((d,c2,v2),c1,v1) in self.by_score(pointscore,boxscore):
+            yield (-d,c1,c2,v1,v2)        
 
 
     def deform(self, point_function, bounds=None, box_function=None):
