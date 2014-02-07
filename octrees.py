@@ -4,11 +4,6 @@ A simple octree library
 (C) James Cranch 2013-2014
 """
 
-# to do
-#   points by linear functional
-#   find nearby points in two octrees
-#   transform by continuous function (eg matrix)
-
 
 import heapq
 
@@ -182,19 +177,7 @@ class Octree():
         coords, value). A little faster than using
         by_distance_from_point and stopping when satisfied.
         """
-        def pointscore(q):
-            s = euclidean_point_point(p,q)
-            if s < epsilon:
-                return s
-            else:
-                return None
-        def boxscore(b):
-            s = euclidean_point_box(p,b)
-            if s < epsilon:
-                return s
-            else:
-                return None
-        for t in self.by_score(pointscore, boxscore):
+        for t in self.by_score(lambda q: bounding(euclidean_point_point(p,q),epsilon), lambda b: bounding(euclidean_point_box(p,b),epsilon)):
             yield t
 
     
@@ -277,6 +260,7 @@ class Octree():
             bounds = box_function(self.bounds)
         return Octree(bounds, self.tree.deform(self.bounds, bounds, point_function, box_function))
 
+
     def apply_matrix(self, matrix, bounds=None):
         """
         Moves the points according to the given matrix.
@@ -284,3 +268,74 @@ class Octree():
         Bounds can be given.
         """
         return self.deform(lambda p:matrix_action(matrix,p), bounds)
+
+
+    def pairs_by_score(self, other, p_p_score, p_b_score, b_p_score, b_b_score):
+        """
+        Iterates through pairs of points, one from each of two
+        argument octrees.
+
+        This is more elaborate than "by_score" above, but similar in
+        many regards. In order to make it efficient, we need to
+        provide four scoring functions. The first one scores two
+        points, the others give the minimum possible score for a point
+        and a box, a box and a point, and a box and a box
+        respectively.
+
+        If any scoring functions return None, that is treated as
+        infinite: the pairs are not of interest.
+
+        Returns a 5-tuple consisting of: the score, the two sets of
+        coordinates, and the data associated to the two points.
+        """
+        l = []
+
+        def enqueue2(tree1,tree2,bounds1,bounds2):
+            if isinstance(tree1,Empty) or isinstance(tree2,Empty):
+                pass
+            elif isinstance(tree1,Singleton):
+                if isinstance(tree2,Singleton):
+                    s = p_p_score(tree1.coords,tree2.coords)
+                    if s is not None:
+                        heapq.heappush(l, (s,False,False,tree1.coords,tree2.coords,tree1.data,tree2.data))
+                else:
+                    s = p_b_score(tree1.coords,bounds2)
+                    if s is not None:
+                        heapq.heappush(l, (s,False,True,tree1.coords,bounds2,tree1.data,tree2))
+            else:
+                if isinstance(tree2,Singleton):
+                    s = b_p_score(bounds1,tree2.coords)
+                    if s is not None:
+                        heapq.heappush(l, (s,True,False,bounds1,tree2.coords,tree1,tree2.data))
+                else:
+                    s = b_b_score(bounds1,bounds2)
+                    if s is not None:
+                        heapq.heappush(l, (s,True,True,bounds1,bounds2,tree1,tree2))
+
+        enqueue2(self.tree, other.tree, self.bounds, other.bounds)
+
+        while len(l)>0:
+            (score,isnode1,isnode2,loc1,loc2,stuff1,stuff2) = heapq.heappop(l)
+            if isnode1:
+                if isnode2:
+                    for (b1,t1) in stuff1.children(loc1):
+                        for (b2,t2) in stuff2.children(loc2):
+                            enqueue2(t1,t2,b1,b2)
+                else:
+                    for (b1,t1) in stuff1.children(loc1):
+                        enqueue2(t1,Singleton(loc2,stuff2),b1,None)
+            else:
+                if isnode2:
+                    for (b2,t2) in stuff2.children(loc2):
+                        enqueue2(Singleton(loc1,stuff1),t2,None,b2)
+                else:
+                    yield (score,loc1,loc2,stuff1,stuff2)
+
+
+    def pairs_by_distance(self, other, epsilon):
+        """
+        Returns pairs within epsilon of each other, one from each
+        octree. Returns them in increasing order of distance.
+        """
+        for t in self.pairs_by_score(other, lambda p1,p2:bounding(euclidean_point_point(p1,p2),epsilon), lambda p,b:bounding(euclidean_point_box(p,b),epsilon),lambda b,p:bounding(euclidean_point_box(p,b),epsilon), lambda b1,b2:bounding(euclidean_box_box(b1,b2),epsilon)):
+            yield t

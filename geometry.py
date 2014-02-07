@@ -7,6 +7,12 @@ Some supporting 3D geometric code
 from math import sqrt
 
 
+def bounding(x,e):
+    if x>e:
+        return None
+    else:
+        return x
+
 
 def point_in_box(p,b):
     "Is p in b?"
