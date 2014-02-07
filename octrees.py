@@ -38,7 +38,11 @@ class Octree():
     def __eq__(self, other):
         return self.bounds == other.bounds and self.tree == other.tree
 
-    
+
+    def __iter__(self):
+        return iter(self.tree)
+
+
     def insert(self, p, d):
         """
         Adds a point at p with value d. Raises KeyError if there is
@@ -106,6 +110,33 @@ class Octree():
             y = y.rebound(b)
         return x.simple_union(y)
         
+
+    def subset(self, point_fn, box_fn=None):
+        """
+        Selects a subset of an octree. The function point_fn takes
+        coordinates and returns True or False. The function box_fn
+        takes coordinates and returns True (if all points in that box
+        are in), False (if all points in that box are out), or None
+        (if some may be in and some others may be out).
+
+        If box_fn is not given, it defaults to considering point_fn on
+        the eight vertices of the box (returning None if they
+        disagree).
+        """
+        if box_fn is None:
+            def new_box_fn(bounds):
+                prejudice = None
+                for v in vertices(bounds):
+                    a = point_fn(v)
+                    if prejudice is (not a):
+                        return None
+                    else:
+                        prejudice = a
+                return prejudice
+            box_fn = new_box_fn
+
+        return Octree(self.bounds, self.tree.subset(self.bounds, point_fn, box_fn))
+
 
     def by_score(self, pointscore, boxscore):
         """

@@ -23,6 +23,9 @@ class Tree():
     def __eq__(self,other):
         raise NotImplementedError()
 
+    def __iter__(self):
+        raise NotImplementedError()
+
     def insert(self, bounds, coords, data):
         raise NotImplementedError()
 
@@ -33,6 +36,9 @@ class Tree():
         raise NotImplementedError()
 
     def enqueue(self, heap, bounds, pointscore, boxscore):
+        raise NotImplementedError()
+
+    def subset(self, bounds, point_fn, box_fn):
         raise NotImplementedError()
 
     def union(self, other, bounds, swapped=False):
@@ -69,6 +75,10 @@ class Empty(Tree):
     def __init__(self):
         pass
 
+    def __iter__(self):
+        return
+        yield
+
     def __len__(self):
         return 0
 
@@ -86,6 +96,9 @@ class Empty(Tree):
 
     def remove(self, bounds, coords):
         raise KeyError("Removing non-existent point")
+
+    def subset(self, bounds, point_fn, box_fn):
+        return self
 
     def enqueue(self, heap, bounds, pointscore, boxscore):
         pass
@@ -110,6 +123,9 @@ class Singleton(Tree):
     def __len__(self):
         return 1
 
+    def __iter__(self):
+        yield (self.coords, self.data)
+
     def __eq__(self,other):
         return isinstance(other,Singleton) and self.coords == other.coords and self.data == other.data
 
@@ -133,6 +149,12 @@ class Singleton(Tree):
             return Empty()
         else:
             raise KeyError("Removing non-existent point")
+
+    def subset(self, bounds, point_fn, box_fn):
+        if point_fn(self.coords):
+            return self
+        else:
+            return Empty()
 
     def enqueue(self, heap, bounds, pointscore, boxscore):
         s = pointscore(self.coords)
@@ -173,6 +195,13 @@ class Node(Tree):
     def __len__(self):
         return sum(sum(sum(len(x) for x in b) for b in a) for a in self.content)
 
+    def __iter__(self):
+        for x in self.content:
+            for y in x:
+                for z in y:
+                    for t in iter(z):
+                        yield t
+
     def __eq__(self,other):
         return isinstance(other,Node) and self.content_array() == other.content_array()
 
@@ -209,6 +238,15 @@ class Node(Tree):
     def children(self, bounds):
         for (b,x) in zip(subboxes(bounds), self.children_no_bounds()):
             yield (b,x)
+
+    def subset(self, bounds, point_fn, box_fn):
+        x = box_fn(bounds)
+        if x is None:
+            return self.smartnode(list(t.subset(b,point_fn,box_fn) for (b,t) in self.children(bounds)))
+        elif x:
+            return self
+        else:
+            return Empty()
 
     def enqueue(self, heap, bounds, pointscore, boxscore):
         s = boxscore(bounds)

@@ -133,6 +133,14 @@ class GeometricTests(TestCase):
         s1 = set(c for (_,c,_) in o1.by_distance_from_point((0.123,0.456,0.789)))
         self.assertEqual(s,s1)
 
+    def test_iter_and_subset(self):
+        l1 = set(t for (t,_) in self.o if sum(t)>0)
+        l2 = set(t for t in self.coords if sum(t)>0)
+        l3 = set(t for (t,_) in self.o.subset(lambda t:sum(t)>0))
+
+        self.assertEqual(l1,l2)
+        self.assertEqual(l1,l3)
+
 
 
 class BinaryTests(TestCase):
