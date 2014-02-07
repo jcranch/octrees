@@ -167,7 +167,7 @@ class BinaryTests(TestCase):
         l2b = list(self.o1.by_proximity_bounded(self.o2,0.1))
         self.assertEqual(l1b,l2b)
 
-    def test_nearby_pairs(self):
+    def test_pairs_by_distance(self):
         l1 = []
         for c1 in self.coords1:
             for c2 in self.coords2:
@@ -177,6 +177,16 @@ class BinaryTests(TestCase):
         l1.sort()
         l2 = list(self.o1.pairs_by_distance(self.o2, 0.1))
         self.assertEqual(l1,l2)
+
+    def test_pairs_nearby(self):
+        s1 = set()
+        for c1 in self.coords1:
+            for c2 in self.coords2:
+                d = euclidean_point_point(c1,c2)
+                if d<0.1:
+                    s1.add((c1,c2,None,None))
+        s2 = set(self.o1.pairs_nearby(self.o2, 0.1))
+        self.assertEqual(s1,s2)
 
 
 if __name__ == '__main__':

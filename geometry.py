@@ -14,6 +14,18 @@ def bounding(x,e):
         return x
 
 
+def agreement(g):
+    "Do all these booleans agree? If so, on what?"
+    prejudice = None
+    for b in g:
+        if b is None:
+            return None
+        if prejudice is (not b):
+            return None
+        prejudice = b
+    return prejudice
+
+
 def point_in_box(p,b):
     "Is p in b?"
     (x,y,z) = p
@@ -128,9 +140,33 @@ def nearest_point_in_box(p,b):
     return (x0,y0,z0)
 
 
+def furthest_point_in_box(p,b):
+    "Returns the furthest point in a box b to a point p"
+    ((minx,maxx), (miny,maxy), (minz,maxz)) = b
+    (x,y,z) = p
+    if 2*x > minx+maxx:
+        x0 = minx
+    else:
+        x0 = maxx
+    if 2*y > miny+maxy:
+        y0 = miny
+    else:
+        y0 = maxy
+    if 2*z > minz+maxz:
+        z0 = minz
+    else:
+        z0 = maxz
+    return (x0,y0,z0)
+
+
 def euclidean_point_box(p,b):
     "The euclidean distance between p and a box b"
     return euclidean_point_point(p,nearest_point_in_box(p,b))
+
+
+def euclidean_point_box_max(p,b):
+    "The furthest distance between p and a box b"
+    return euclidean_point_point(p,furthest_point_in_box(p,b))
 
 
 def euclidean_box_box(b1,b2):
@@ -155,6 +191,16 @@ def euclidean_box_box(b1,b2):
         z = minz1 - maxz2
     else:
         z = 0
+    return sqrt(x*x+y*y+z*z)
+
+
+def euclidean_box_box_max(b1,b2):
+    "The maximum distance between two boxes"
+    ((minx1,maxx1), (miny1,maxy1), (minz1,maxz1)) = b1
+    ((minx2,maxx2), (miny2,maxy2), (minz2,maxz2)) = b2
+    x = max(maxx2-minx1,maxx1-minx2)
+    y = max(maxy2-miny1,maxy1-miny2)
+    z = max(maxz2-minz1,maxz1-minz2)
     return sqrt(x*x+y*y+z*z)
 
 

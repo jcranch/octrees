@@ -124,16 +124,7 @@ class Octree():
         disagree).
         """
         if box_fn is None:
-            def new_box_fn(bounds):
-                prejudice = None
-                for v in vertices(bounds):
-                    a = point_fn(v)
-                    if prejudice is (not a):
-                        return None
-                    else:
-                        prejudice = a
-                return prejudice
-            box_fn = new_box_fn
+            box_fn = lambda b: agreement(point_fn(v) for v in vertices(b))
 
         return Octree(self.bounds, self.tree.subset(self.bounds, point_fn, box_fn))
 
@@ -369,4 +360,93 @@ class Octree():
         octree. Returns them in increasing order of distance.
         """
         for t in self.pairs_by_score(other, lambda p1,p2:bounding(euclidean_point_point(p1,p2),epsilon), lambda p,b:bounding(euclidean_point_box(p,b),epsilon),lambda b,p:bounding(euclidean_point_box(p,b),epsilon), lambda b1,b2:bounding(euclidean_box_box(b1,b2),epsilon)):
+            yield t
+
+
+    def pairs_generate(self, other, p_p_fn, p_b_fn=None, b_p_fn=None, b_b_fn=None):
+        """
+        Yields pairs of points satisfying some criterion.
+
+        Requires four functions: p_p_fn which takes values either
+        True or False to say whether a pair should be yielded. The
+        others act on boxes, and may return True ("everything is of
+        interest"), False ("nothing is of interest") or None ("maybe
+        some things are and some things aren't").
+
+        If the later functions are not given, they default to
+        considering all vertices.
+        """
+        if p_b_fn is None:
+            p_b_fn = lambda p,b: agreement(p_p_fn(p,q) for q in vertices(b))
+        if b_p_fn is None:
+            b_p_fn = lambda b,p: agreement(p_p_fn(q,p) for q in vertices(b))
+        if b_b_fn is None:
+            b_b_fn = lambda b1,b2: agreement(p_b_fn(p,b2) for p in vertices(b1))
+
+        def inner(tree1,tree2,bounds1,bounds2):
+            x = b_b_fn(bounds1,bounds2)
+            if x is True:
+                for (c1,v1) in tree1:
+                    for (c2,v2) in tree2:
+                        yield (c1,c2,v1,v2)
+            elif x is False:
+                pass
+            elif isinstance(tree1,Empty):
+                pass
+            elif isinstance(tree2,Empty):
+                pass
+            elif isinstance(tree1,Singleton):
+                c1 = tree1.coords
+                v1 = tree1.data
+                for (c2,v2) in tree2.subset(bounds2, lambda p:p_p_fn(c1,p), lambda b:p_b_fn(c1,b)):
+                    yield (c1,c2,v1,v2)
+            elif isinstance(tree2,Singleton):
+                c2 = tree2.coords
+                v2 = tree2.data
+                for (c1,v1) in tree1.subset(bounds1, lambda p:p_p_fn(p,c2), lambda b:b_p_fn(b,c2)):
+                    yield (c1,c2,v1,v2)
+            else:
+                for (b1,t1) in tree1.children(bounds1):
+                    for (b2,t2) in tree2.children(bounds2):
+                        for t in inner(t1,t2,b1,b2):
+                            yield t
+        for t in inner(self.tree, other.tree, self.bounds, other.bounds):
+            yield t
+
+
+    def pairs_nearby(self,other,epsilon):
+        """
+        Generates pairs within epsilon of each other, in any order.
+        """
+        def p_p_fn(p1,p2):
+            return euclidean_point_point(p1,p2)<epsilon
+
+        def p_b_fn(p,b):
+            if euclidean_point_box(p,b) < epsilon:
+                if euclidean_point_box_max(p,b) < epsilon:
+                    return True
+                else:
+                    return None
+            else:
+                return False
+
+        def b_p_fn(b,p):
+            if euclidean_point_box(p,b) < epsilon:
+                if euclidean_point_box_max(p,b) < epsilon:
+                    return True
+                else:
+                    return None
+            else:
+                return False
+
+        def b_b_fn(b1,b2):
+            if euclidean_box_box(b1,b2) < epsilon:
+                if euclidean_box_box_max(b1,b2) < epsilon:
+                    return True
+                else:
+                    return None
+            else:
+                return False            
+
+        for t in self.pairs_generate(other, p_p_fn, p_b_fn, b_p_fn, b_b_fn):
             yield t
