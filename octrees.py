@@ -43,6 +43,16 @@ class Octree():
         return iter(self.tree)
 
 
+    def copy(self):
+        """
+        Return a copy of self.
+
+        Since Octree is just a wrapper for a pure data structure, this
+        is performed in constant time.
+        """
+        return Octree(self.bounds, self.tree)
+
+
     def insert(self, p, d):
         """
         Adds a point at p with value d. Raises KeyError if there is
