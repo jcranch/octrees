@@ -4,7 +4,7 @@ Unit testing for the octrees library
 (C) James Cranch 2013-2014
 """
 
-from unittest import TestCase, main
+from unittest import TestCase
 from math import sin
 
 from octrees import Octree
@@ -200,7 +200,3 @@ class BinaryTests(TestCase):
                     s1.add((c1,c2,None,None))
         s2 = set(self.o1.pairs_nearby(self.o2, 0.1))
         self.assertEqual(s1,s2)
-
-
-if __name__ == '__main__':
-    main()
