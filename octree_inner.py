@@ -3,6 +3,9 @@ The core functionality: a purely functional implementation. We have
 this two-layer setup so that octree nodes do not have to store their
 own bounds.
 
+Also, people used to python expect mutable data structures; mutability
+is most easily provided using a wrapper.
+
 The user should probably not ever want to import or use this code
 directly.
 
@@ -56,17 +59,17 @@ class Tree():
             data = [a,b,c,d,e,f,g,h]
         singleton = None
         for x in data:
-            if isinstance(x,Node):
-                return Node(data)
-            elif isinstance(x,Singleton):
+            if isinstance(x,self.node):
+                return self.node(data)
+            elif isinstance(x,self.singleton):
                 if singleton is not None:
-                    return Node(data)
+                    return self.node(data)
                 else:
                     singleton = x
         if singleton is not None:
             return singleton
         else:
-            return Empty()
+            return self.empty()
 
 
 
@@ -83,16 +86,16 @@ class Empty(Tree):
         return 0
 
     def __eq__(self,other):
-        return isinstance(other,Empty)
+        return isinstance(other,self.empty)
 
     def __hash__(self):
-        return hash((Empty,))
+        return hash((self.empty,))
 
     def insert(self, bounds, coords, data):
-        return Singleton(coords, data)
+        return self.singleton(coords, data)
 
     def update(self, bounds, coords, data):
-        return Singleton(coords, data)
+        return self.singleton(coords, data)
 
     def remove(self, bounds, coords):
         raise KeyError("Removing non-existent point")
@@ -112,6 +115,8 @@ class Empty(Tree):
     def deform(self, oldbounds, newbounds, point_fn, box_fn):
         return self
 
+Tree.empty = Empty
+
 
 
 class Singleton(Tree):
@@ -127,26 +132,26 @@ class Singleton(Tree):
         yield (self.coords, self.data)
 
     def __eq__(self,other):
-        return isinstance(other,Singleton) and self.coords == other.coords and self.data == other.data
+        return isinstance(other,self.singleton) and self.coords == other.coords and self.data == other.data
 
     def __hash__(self):
-        return hash((Singleton,coords,data))
+        return hash((self.singleton,coords,data))
 
     def insert(self, bounds, coords, data):
         if self.coords == coords:
             raise KeyError("Key (%s,%s,%s) already present"%(self.coords))
         else:
-            return Node().insert(bounds,self.coords,self.data).insert(bounds,coords,data)
+            return self.node().insert(bounds,self.coords,self.data).insert(bounds,coords,data)
 
     def update(self, bounds, coords, data):
         if self.coords == coords:
-            return Singleton(coords, data)
+            return self.singleton(coords, data)
         else:
-            return Node().insert(bounds,self.coords,self.data).insert(bounds,coords,data)
+            return self.node().insert(bounds,self.coords,self.data).insert(bounds,coords,data)
 
     def remove(self, bounds, coords):
         if self.coords == coords:
-            return Empty()
+            return self.empty()
         else:
             raise KeyError("Removing non-existent point")
 
@@ -154,7 +159,7 @@ class Singleton(Tree):
         if point_fn(self.coords):
             return self
         else:
-            return Empty()
+            return self.empty()
 
     def enqueue(self, heap, bounds, pointscore, boxscore):
         s = pointscore(self.coords)
@@ -168,24 +173,27 @@ class Singleton(Tree):
         if point_in_box(self.coords, newbounds):
             return self
         else:
-            return Empty()
+            return self.empty()
 
     def deform(self, oldbounds, newbounds, point_fn, box_fn):
         coords = point_fn(self.coords)
         if point_in_box(coords, newbounds):
-            return Singleton(coords, self.data)
+            return self.singleton(coords, self.data)
         else:
-            return Empty()
+            return self.empty()
 
+Tree.singleton = Singleton
 
 
 class Node(Tree):
 
-    def __init__(self, content=[Empty()]*8):
+    def __init__(self, content=None):
         """
         Takes either a list of eight octrees, or generators of two
         nested three deep.
         """
+        if content is None:
+            content = [self.empty()]*8
         if len(content)==8:
             (a,b,c,d,e,f,g,h) = content
             self.content = (((a,b),(c,d)),((e,f),(g,h)))
@@ -203,10 +211,10 @@ class Node(Tree):
                         yield t
 
     def __eq__(self,other):
-        return isinstance(other,Node) and self.content_array() == other.content_array()
+        return isinstance(other,self.node) and self.content_array() == other.content_array()
 
     def __hash__(self):
-        return hash((Node,content))
+        return hash((self.node,content))
 
     def content_array(self):
         return [[list(b) for b in a] for a in self.content]
@@ -215,13 +223,13 @@ class Node(Tree):
         a = self.content_array()
         ((r,s,t),newbounds) = narrow(bounds, coords)
         a[r][s][t] = a[r][s][t].insert(newbounds, coords, data)
-        return Node(a)
+        return self.node(a)
 
     def update(self, bounds, coords, data):
         a = self.content_array()
         ((r,s,t),newbounds) = narrow(bounds, coords)
         a[r][s][t] = a[r][s][t].update(newbounds, coords, data)
-        return Node(a)
+        return self.node(a)
 
     def remove(self, bounds, coords):
         a = self.content_array()
@@ -246,7 +254,7 @@ class Node(Tree):
         elif x:
             return self
         else:
-            return Empty()
+            return self.empty()
 
     def enqueue(self, heap, bounds, pointscore, boxscore):
         s = boxscore(bounds)
@@ -255,22 +263,25 @@ class Node(Tree):
         
     def union(self, other, bounds, swapped=False):
         if swapped:
-            return Node([x.union(y,b) for (x,y,b) in zip(self.children_no_bounds(), other.children_no_bounds(), subboxes(bounds))])
+            return self.node([x.union(y,b) for (x,y,b) in zip(self.children_no_bounds(), other.children_no_bounds(), subboxes(bounds))])
         else:
             return other.union(self, bounds, swapped=True)
 
     def rebound(self, oldbounds, newbounds):
         if box_contains(oldbounds, newbounds):
-            return Node([self.rebound(oldbounds, b) for b in subboxes(newbounds)])
+            return self.node([self.rebound(oldbounds, b) for b in subboxes(newbounds)])
         elif boxes_disjoint(oldbounds, newbounds):
-            return Empty()
+            return self.empty()
         else:
             return reduce(lambda x,y:x.union(y,newbounds), (x.rebound(b,newbounds) for (b,x) in self.children(oldbounds)))
 
     def deform(self, oldbounds, newbounds, point_fn, box_fn):
         if box_contains(oldbounds, newbounds):
-            return Node([self.deform(oldbounds, b, point_fn, box_fn) for b in subboxes(newbounds)])
+            return self.node([self.deform(oldbounds, b, point_fn, box_fn) for b in subboxes(newbounds)])
         elif boxes_disjoint(box_fn(oldbounds), newbounds):
-            return Empty()
+            return self.empty()
         else:
             return reduce(lambda x,y:x.union(y,newbounds), (x.deform(b,newbounds,point_fn,box_fn) for (b,x) in self.children(oldbounds)))
+
+Tree.node = Node
+
