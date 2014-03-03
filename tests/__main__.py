@@ -1,5 +1,6 @@
 from unittest import main
 
-from test_octrees import *
+from octrees_test import *
+from blob_octrees_test import *
 
 main()

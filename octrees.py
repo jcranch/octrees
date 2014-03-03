@@ -7,8 +7,10 @@ A simple octree library
 
 import heapq
 
+
 from geometry import *
-from octree_inner import *
+from inner.octree_inner import *
+
 
 
 class Octree():
@@ -21,11 +23,11 @@ class Octree():
     creates an empty octree with bounds as given.
     """
 
-    def __init__(self, bounds, tree=Empty()):
+    def __init__(self, bounds, tree=Tree.empty()):
         self.bounds = bounds
         self.tree = tree
 
-
+    
     def check_bounds(self, p):
         if not point_in_box(p, self.bounds):
             raise KeyError("Point (%s,%s,%s) out of bounds"%p)
@@ -385,11 +387,11 @@ class Octree():
                             enqueue2(t1,t2,b1,b2)
                 else:
                     for (b1,t1) in stuff1.children(loc1):
-                        enqueue2(t1,Singleton(loc2,stuff2),b1,None)
+                        enqueue2(t1,Tree.singleton(loc2,stuff2),b1,None)
             else:
                 if isnode2:
                     for (b2,t2) in stuff2.children(loc2):
-                        enqueue2(Singleton(loc1,stuff1),t2,None,b2)
+                        enqueue2(Tree.singleton(loc1,stuff1),t2,None,b2)
                 else:
                     yield (score,loc1,loc2,stuff1,stuff2)
 

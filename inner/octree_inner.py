@@ -20,48 +20,15 @@ from geometry import *
 
 class Tree():
 
-    def __len__(self):
-        raise NotImplementedError()
-
-    def __eq__(self,other):
-        raise NotImplementedError()
-
-    def __iter__(self):
-        raise NotImplementedError()
-
-    def insert(self, bounds, coords, data):
-        raise NotImplementedError()
-
-    def update(self, bounds, coords, data):
-        raise NotImplementedError()
-
-    def remove(self, bounds, coords):
-        raise NotImplementedError()
-
-    def enqueue(self, heap, bounds, pointscore, boxscore):
-        raise NotImplementedError()
-
-    def subset(self, bounds, point_fn, box_fn):
-        raise NotImplementedError()
-
-    def union(self, other, bounds, swapped=False):
-        raise NotImplementedError()
-
-    def rebound(self, oldbounds, newbounds):
-        raise NotImplementedError()
-
-    def deform(self, oldbounds, newbounds, point_fn, box_fn):
-        raise NotImplementedError()
-
     def smartnode(self, data):
         if len(data) != 8:
             (((a,b),(c,d)),((e,f),(g,h))) = data
             data = [a,b,c,d,e,f,g,h]
         singleton = None
         for x in data:
-            if isinstance(x,self.node):
+            if isinstance(x,Node):
                 return self.node(data)
-            elif isinstance(x,self.singleton):
+            elif isinstance(x,Singleton):
                 if singleton is not None:
                     return self.node(data)
                 else:
@@ -86,7 +53,7 @@ class Empty(Tree):
         return 0
 
     def __eq__(self,other):
-        return isinstance(other,self.empty)
+        return isinstance(other,Empty)
 
     def __hash__(self):
         return hash((self.empty,))
@@ -132,7 +99,7 @@ class Singleton(Tree):
         yield (self.coords, self.data)
 
     def __eq__(self,other):
-        return isinstance(other,self.singleton) and self.coords == other.coords and self.data == other.data
+        return isinstance(other,Singleton) and self.coords == other.coords and self.data == other.data
 
     def __hash__(self):
         return hash((self.singleton,coords,data))
@@ -211,7 +178,7 @@ class Node(Tree):
                         yield t
 
     def __eq__(self,other):
-        return isinstance(other,self.node) and self.content_array() == other.content_array()
+        return isinstance(other,Node) and self.content_array() == other.content_array()
 
     def __hash__(self):
         return hash((self.node,content))
