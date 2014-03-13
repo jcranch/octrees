@@ -26,6 +26,12 @@ def agreement(g):
     return prejudice
 
 
+def box_volume(b):
+    "The volume of box b"
+    ((minx,maxx), (miny, maxy), (minz, maxz)) = b
+    return (maxx-minx)*(maxy-miny)*(maxz-minz)
+
+
 def point_in_box(p,b):
     "Is p in b?"
     (x,y,z) = p
@@ -44,7 +50,7 @@ def boxes_disjoint(b1,b2):
     "Are b1 and b2 disjoint?"
     ((minx1,maxx1), (miny1, maxy1), (minz1, maxz1)) = b1
     ((minx2,maxx2), (miny2, maxy2), (minz2, maxz2)) = b2
-    return maxx2 <= minx1 or maxx1 <= minx1 or maxy2 <= miny1 or maxy1 <= miny1 or maxz2 <= minz1 or maxz1 <= minz1
+    return maxx2 <= minx1 or maxx1 <= minx2 or maxy2 <= miny1 or maxy1 <= miny2 or maxz2 <= minz1 or maxz1 <= minz2
 
 
 def union_box(b1,b2):
