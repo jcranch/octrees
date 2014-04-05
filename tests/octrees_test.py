@@ -8,7 +8,7 @@ from unittest import TestCase
 from math import sin
 
 from octrees import Octree
-from geometry import *
+from ..geometry import *
 
 
 

@@ -14,7 +14,7 @@ directly.
 
 import heapq
 
-from geometry import *
+from octrees.geometry import *
 
 
 
