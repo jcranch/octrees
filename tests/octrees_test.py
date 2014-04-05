@@ -141,6 +141,25 @@ class GeometricTests(TestCase):
         self.assertEqual(l1,l2)
         self.assertEqual(l1,l3)
 
+    def test_point_within_distance(self):
+        epsilon = 0.1
+        for t in xrange(150,200):
+            p = (sin(0.1*t), sin(0.2*t), sin(0.3*t))
+
+            try:
+                self.o.by_distance_from_point(p,epsilon).next()
+                f_computed = True
+            except StopIteration:
+                f_computed = False
+
+            f_real = False
+            for (q,_) in self.o:
+                if euclidean_point_point(p,q) < epsilon:
+                    f_real = True
+                    break
+            
+            self.assertEqual(f_computed,f_real)
+
 
 
 class BinaryTests(TestCase):
