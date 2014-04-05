@@ -22,12 +22,15 @@ class BlobOctree():
     somewhere near that region. In practice, choosing the centroid is
     a good option.
 
+    We demand that every region has an "extent", a box which bounds
+    it.
+
     Usage:
         BlobOctree((minx,maxx),(miny,maxy),(minz,maxz))
     creates an empty blob octree with bounds as given.
     """
 
-    def __init__(self, bounds, tree=Tree.empty()):
+    def __init__(self, bounds, tree=BlobTree.empty()):
         self.bounds = bounds
         self.tree = tree
 
@@ -46,7 +49,8 @@ class BlobOctree():
 
 
     def __iter__(self):
-        return iter(self.tree)
+        for (p,(b,d)) in self.tree:
+            yield (p,b,d)
 
 
     def insert(self,p,b,d):
@@ -69,7 +73,64 @@ class BlobOctree():
         self.tree = self.tree.update(self.bounds, p, (b,d))
 
 
+    def copy(self):
+        """
+        Return a copy of self.
+
+        Since BlobOctree is just a wrapper for a pure data structure,
+        this is performed in constant time.
+        """
+        return BlobOctree(self.bounds, self.tree)
+
+
     def extend(self,g):
         for (p,b,d) in g:
             self.insert(p,b,d)
-        
+
+
+    def intersection_with_box(self,b):
+        """
+        Find the sub-octree of regions whose extents overlap with b.
+        """
+        return BlobOctree(self.bounds, self.tree.intersection_with_box(b))
+
+
+    def intersect_with_box(self,b):
+        """
+        Yield regions whose extents overlap with b.
+        """
+        for t in self.tree.intersect_with_box(b):
+            yield t
+
+
+    def possible_overlaps(self,other):
+        """
+        Yields pairs of regions whose extents overlap, one from each
+        blob octree.
+
+        Likely to be of use in writing algorithms to compute geometric
+        intersections.
+        """
+
+        for t in self.tree.possible_overlaps(other.tree):
+            yield t
+
+
+    def by_possible_overlap(self,other):
+        """
+        Yields regions in self together with a list of regions from
+        other whose extents overlap.
+
+        Likely to be of use in writing algorithms to compute geometric
+        differences.
+        """
+        for t in self.tree.by_possible_overlap(other.tree):
+            yield t
+
+
+    def debug_description(self):
+        """
+        Describes the tree structure, for debugging purposes.
+        """
+        print "Octree with bounds %s:"%(self.bounds,)
+        self.tree.debug_description(1)
