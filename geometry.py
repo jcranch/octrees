@@ -4,6 +4,7 @@ Some supporting 3D geometric code
 (C) James Cranch 2013-2014
 """
 
+from __future__ import division
 from math import sqrt
 
 
@@ -24,6 +25,12 @@ def agreement(g):
             return None
         prejudice = b
     return prejudice
+
+
+def centroid(b):
+    "The centroid of box b"
+    ((minx,maxx), (miny, maxy), (minz, maxz)) = b
+    return ((minx+maxx)/2, (miny+maxy)/2, (minz+maxz)/2)
 
 
 def box_volume(b):
@@ -215,12 +222,8 @@ def euclidean_box_box_minmax(b1,b2):
     The minimum over all points in b1 of the maximum over all points
     in b2 of the distance.
     """
-    ((minx1,maxx1), (miny1,maxy1), (minz1,maxz1)) = b1
-    ((minx2,maxx2), (miny2,maxy2), (minz2,maxz2)) = b2
-    x = min(max(abs(minx2-minx1),abs(maxx2-minx1)),max(abs(minx2-maxx1),abs(maxx2-maxx1)))
-    y = min(max(abs(miny2-miny1),abs(maxy2-miny1)),max(abs(miny2-maxy1),abs(maxy2-maxy1)))
-    z = min(max(abs(minz2-minz1),abs(maxz2-minz1)),max(abs(minz2-maxz1),abs(maxz2-maxz1)))
-    return sqrt(x*x+y*y+z*z)
+    p = nearest_point_in_box(centroid(b2), b1)
+    return euclidean_point_box_max(p, b2)
     
 
 def convex_box_deform(f,b):
