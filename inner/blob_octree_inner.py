@@ -11,7 +11,7 @@ directly.
 (C) James Cranch 2013-2014
 """
 
-from geometry import *
+from octrees.geometry import *
 from octree_inner import *
 
 
