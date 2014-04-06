@@ -4,6 +4,8 @@ Unit testing for the octrees library
 (C) James Cranch 2013-2014
 """
 
+from __future__ import division
+
 import random
 from unittest import TestCase
 

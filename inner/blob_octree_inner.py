@@ -11,6 +11,8 @@ directly.
 (C) James Cranch 2013-2014
 """
 
+from __future__ import division
+
 from octrees.geometry import *
 from octree_inner import *
 

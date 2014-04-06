@@ -12,6 +12,8 @@ directly.
 (C) James Cranch 2013-2014
 """
 
+from __future__ import division
+
 import heapq
 
 from octrees.geometry import *
