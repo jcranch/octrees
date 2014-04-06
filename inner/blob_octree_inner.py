@@ -51,6 +51,40 @@ class BlobTree(Tree):
         for t in self.iter_by_extent(point_fn, box_fn):
             yield t
 
+    def intersect_with_line(self,a,v,positive=True):
+        """
+        Yields regions which overlap with the line a+rv. If "positive"
+        is true, then r must be positive (so in fact, you are
+        intersecting with a halfline).
+        """
+        def dot(v1,v2):
+            return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]
+
+        def sub(v1,v2):
+            return (v1[0]-v2[0], v1[1]-v2[1], v1[2]-v2[2])
+
+        def point_fn(e):
+            if positive and all(dot(sub(u,a),v) < 0 for u in vertices(e)):
+                return False
+            mins = []
+            maxs = []
+            for (ac,vc,ec) in zip(a,v,e):
+                ec1,ec2 = ec
+                if vc == 0:
+                    if not(ec1 < ac < ec2):
+                        return False
+                else:
+                    r,s = (ec1-ac)/vc, (ec2-ac)/vc
+                    mins.append(min(r,s))
+                    maxs.append(max(r,s))
+            return max(mins) < min(maxs)
+
+        def box_fn(e):
+            return (point_fn(e) and None)
+
+        for t in self.iter_by_extent(point_fn, box_fn):
+            yield t
+
 
 
 class BlobEmpty(BlobTree, Empty):

@@ -55,3 +55,20 @@ class BlobTests(TestCase):
         self.assertEqual(s1,s0)
         self.assertEqual(s2,s0)
         self.assertEqual(s3,s0)
+
+    def test_intersect_with_line(self):
+        for xi in xrange(-8,8,2):
+            x = xi/10
+            for yi in xrange(-8,8,2):
+                y = yi/10
+                for zi in xrange(-8,8,2):
+                    z = zi/10
+
+                    def decent(t):
+                        ((minx,maxx),(miny,maxy),(minz,maxz)) = t
+                        return maxx > x and miny < y < maxy and minz < z < maxz
+
+                    s0 = set(self.o1.intersect_with_line((x,y,z),(1,0,0)))
+                    s1 = set(t for t in self.o1 if decent(t[1]))
+
+                    self.assertEqual(s0,s1)

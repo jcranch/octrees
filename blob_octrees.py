@@ -104,6 +104,16 @@ class BlobOctree():
             yield t
 
 
+    def intersect_with_line(self,a,v,positive=True):
+        """
+        Yield regions whose extents overlap with the line a+rv. If
+        positive is true, r must be positive (so we're intersecting
+        with the halfline).
+        """
+        for t in self.tree.intersect_with_line(a,v,positive):
+            yield t
+
+
     def possible_overlaps(self,other):
         """
         Yields pairs of regions whose extents overlap, one from each
