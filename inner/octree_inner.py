@@ -60,6 +60,9 @@ class Empty(Tree):
     def __hash__(self):
         return hash((self.empty,))
 
+    def get(self, bounds, coords, default):
+        return default
+
     def insert(self, bounds, coords, data):
         return self.singleton(coords, data)
 
@@ -105,6 +108,12 @@ class Singleton(Tree):
 
     def __hash__(self):
         return hash((self.singleton,coords,data))
+
+    def get(self, bounds, coords, default):
+        if self.coords == coords:
+            return self.data
+        else:
+            return default
 
     def insert(self, bounds, coords, data):
         if self.coords == coords:
@@ -187,6 +196,10 @@ class Node(Tree):
 
     def content_array(self):
         return [[list(b) for b in a] for a in self.content]
+
+    def get(self, bounds, coords, default):
+        ((r,s,t),newbounds) = narrow(bounds, coords)
+        return self.content_array()[r][s][t].get(newbounds, coords, default)
 
     def insert(self, bounds, coords, data):
         a = self.content_array()

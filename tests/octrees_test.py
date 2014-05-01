@@ -54,10 +54,15 @@ class GeometricTests(TestCase):
     def setUp(self):
         self.coords = set((sin(0.1*t), sin(0.2*t), sin(0.3*t)) for t in xrange(50))
         self.o = Octree(((-1.0, 1.0),(-1.0, 1.0),(-1.0, 1.0)))
-        self.o.extend((p,None) for p in self.coords)
+        self.o.extend((p,True) for p in self.coords)
 
     def test_basic(self):
         self.assertEqual(len(self.o), 50)
+
+    def test_get(self):
+        for (i,p) in enumerate(self.coords):
+            self.assertTrue(self.o.get(p,False))
+        self.assertFalse(self.o.get((2.3,3.4,4.5),False))
 
     def test_by_distance_from_point(self):
         p = (0.123, 0.456, 0.789)
@@ -115,11 +120,11 @@ class GeometricTests(TestCase):
         l  = [c for (_,c,_) in self.o.by_distance_from_point(p)]
 
         o1 = Octree(((-1.0, 1.0),(-1.0, 1.0),(-1.0, 1.0)))
-        o1.extend((p,None) for p in l[:25])
+        o1.extend((p,True) for p in l[:25])
         self.assertEqual(len(o1), 25)
 
         o2 = Octree(((-1.0, 1.0),(-1.0, 1.0),(-1.0, 1.0)))
-        o2.extend((p,None) for p in l[25:])
+        o2.extend((p,True) for p in l[25:])
         self.assertEqual(len(o2), 25)
 
         self.assertEqual(o1.simple_union(o2), self.o)

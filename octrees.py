@@ -56,6 +56,16 @@ class Octree():
         return Octree(self.bounds, self.tree)
 
 
+    def get(self,p,default=None):
+        """
+        Finds the data associated to the point at p.
+        """
+        if point_in_box(p, self.bounds):
+            return self.tree.get(self.bounds, p, default)
+        else:
+            return default
+
+
     def insert(self, p, d):
         """
         Adds a point at p with value d. Raises KeyError if there is
