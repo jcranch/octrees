@@ -85,6 +85,22 @@ class BlobTree(Tree):
         for t in self.iter_by_extent(point_fn, box_fn):
             yield t
 
+    def intersect_with_plane(self, f):
+        """
+        Yields regions whose extents have at least one corner p with
+        f(p)>=0 and at least one corner q with f(q)<=0. In case f is a
+        linear functional (the intended use), this gives regions whose
+        extents lie on a plane.
+        """
+
+        def point_fn(e):
+            return any(f(p)>=0 for p in vertices(e)) and any(f(q)<=0 for q in vertices(e))
+
+        def box_fn(e):
+            return point_fn(e) and None
+
+        return self.subset_by_extent(point_fn, box_fn)
+
 
 
 class BlobEmpty(BlobTree, Empty):

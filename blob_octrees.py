@@ -17,14 +17,12 @@ class BlobOctree():
     Blob Octrees: an efficient data structure for data associated with
     regions in 3D space. Each region must be associated to a reference
     point, which must be unique, and must lie within certain bounds
-    (the region need not lie within those bounds).
+    (the region need not lie within those bounds). Each region is
+    specified in terms of its "extent": a box which bounds it.
 
-    It is very helpful (though not required) if the reference point is
-    somewhere near that region. In practice, choosing the centroid is
-    a good option.
-
-    We demand that every region has an "extent", a box which bounds
-    it.
+    It is very helpful (though not required) if the point's reference
+    point is somewhere near that region. In practice, choosing the
+    centroid is an excellent option.
 
     Usage:
         BlobOctree((minx,maxx),(miny,maxy),(minz,maxz))
@@ -111,6 +109,20 @@ class BlobOctree():
         with the halfline).
         """
         for t in self.tree.intersect_with_line(a,v,positive):
+            yield t
+
+
+    def intersect_with_plane(self,f):
+        """
+        Yield regions whose extents overlap with the plane f(v)=0. The
+        function f is assumed to be a linear functional.
+
+        In fact it might not be a linear functional, and you could use
+        this to find intersections with a surface. In general, that's
+        not guaranteed to work: it'll only find regions where the
+        corners of their extent straddle both sides of the surface.
+        """
+        for t in self.tree.intersect_with_plane(f):
             yield t
 
 
