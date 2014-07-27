@@ -108,12 +108,12 @@ class BlobTree(Tree):
         """
 
         def point_fn(e):
-            return any(f(p)>=0 for p in vertices(e)) and any(f(q)<=0 for q in vertices(e))
+            return box_intersects_plane(e,f)
 
         def box_fn(e):
-            return point_fn(e) and None
+            return box_intersects_plane(e,f) and None
 
-        return self.subset_by_extent(point_fn, box_fn)
+        return self.iter_by_extent(point_fn, box_fn)
 
 
 

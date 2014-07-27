@@ -1,6 +1,7 @@
 from unittest import main
 
-from octrees_test import *
-from blob_octrees_test import *
+from test_geometry import *
+from test_octrees import *
+from test_blob_octrees import *
 
 main()

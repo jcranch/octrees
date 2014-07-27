@@ -274,6 +274,7 @@ def line_segment_intersects_box(p,q,b):
     # can trim the line to the box by y coordinate.
     if qy<py:
         (px,py,pz,qx,qy,qz) = (qx,qy,qz,px,py,pz)
+        print "swapping; p = %s, q = %s"%((px,py,pz),(qx,qy,qz))
     if qy<miny or maxy<py:
         return False
     if py<miny:
@@ -290,7 +291,15 @@ def line_segment_intersects_box(p,q,b):
     # Now just look at the z coordinates.
     if qz<pz:
         (px,py,pz,qx,qy,qz) = (qx,qy,qz,px,py,pz)
-    if qy<miny or maxy<py:
+    if qz<minz or maxz<pz:
         return False
     else:
         return True
+
+
+
+def box_intersects_plane(b,f):
+    """
+    Does the box b intersect the plane defined by f(x)=0?
+    """
+    return any(f(p)>=0 for p in vertices(b)) and any(f(q)<=0 for q in vertices(b))

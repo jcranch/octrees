@@ -6,7 +6,7 @@ Unit testing for the octrees library
 
 from __future__ import division
 
-from unittest import TestCase
+from unittest import TestCase, skip
 from math import sin
 
 from octrees import BlobOctree
@@ -72,3 +72,27 @@ class BlobTests(TestCase):
                     s1 = set(t for t in self.o1 if decent(t[1]))
 
                     self.assertEqual(s0,s1)
+
+    def test_intersect_with_line_segment(self):
+        s0 = set(self.o1.intersect_with_line_segment((-0.5,-0.5,-0.5),(0.5,0.5,0.5)))
+        s1 = set()
+        for t in zip(self.coords, self.extents, xrange(50)):
+            (p,b,n) = t
+            for i in xrange(-500,501):
+                x = (i/1000.0, i/1000.0, i/1000.0)
+                if point_in_box(x,b):
+                    s1.add(t)
+                    break
+        self.assertEqual(s0,s1)
+
+    def test_intersect_with_plane(self):
+        for d in [0]:
+            fn = lambda p: p[d]-0.25
+
+            s0 = set(self.o1.intersect_with_plane(fn))
+            s1 = set()
+            for t in zip(self.coords, self.extents, xrange(50)):
+                (_,b,_) = t
+                if b[d][0] <= 0.25 <= b[d][1]:
+                    s1.add(t)
+            self.assertEqual(s0,s1)

@@ -51,3 +51,22 @@ class GeometryTests(TestCase):
 
             self.assertEqual(d1,d0)
             self.assertEqual(d2,d0)
+
+    def test_line_segment_against_box1(self):
+        b = ((-0.0831860995156494, 0.11681390048435061), (-0.06637695277886153, 0.1336230472211385), (-0.04957731219318878, 0.15042268780681123))
+        p = (-0.5,-0.5,-0.5)
+        q = (0.5,0.5,0.5)
+        self.assertTrue(line_segment_intersects_box(p,q,b))
+        self.assertTrue(line_segment_intersects_box(q,p,b))
+
+    def test_line_segment_against_box2(self):
+        b = ((0.09866933079506121, 0.2986693307950612), (0.2894183423086505, 0.48941834230865056), (0.4646424733950354, 0.6646424733950353))
+        p = (-0.5,-0.5,-0.5)
+        q = (0.5,0.5,0.5)
+        self.assertFalse(line_segment_intersects_box(p,q,b))
+        self.assertFalse(line_segment_intersects_box(q,p,b))
+
+    def test_box_intersects_plane(self):
+        b = ((0.09866933079506121, 0.2986693307950612), (0.2894183423086505, 0.48941834230865056), (0.4646424733950354, 0.6646424733950353))
+        f = lambda p: p[0]-0.25
+        self.assertTrue(box_intersects_plane(b,f))
