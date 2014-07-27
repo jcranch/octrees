@@ -112,6 +112,15 @@ class BlobOctree():
             yield t
 
 
+    def intersect_with_line_segment(self,a,b):
+        """
+        Yield regions whose extents overlap with the line segment
+        between points a and b.
+        """
+        for t in self.tree.intersect_with_line_segment(a,b):
+            yield t
+
+
     def intersect_with_plane(self,f):
         """
         Yield regions whose extents overlap with the plane f(v)=0. The

@@ -85,6 +85,20 @@ class BlobTree(Tree):
         for t in self.iter_by_extent(point_fn, box_fn):
             yield t
 
+    def intersect_with_line_segment(self, a, b):
+        """
+        Yields regions which overlap with the line between a and b.
+        """
+
+        def point_fn(e):
+            return line_segment_intersects_box(a,b,e)
+
+        def box_fn(e):
+            return (point_fn(e) and None)
+
+        for t in self.iter_by_extent(point_fn, box_fn):
+            yield t
+
     def intersect_with_plane(self, f):
         """
         Yields regions whose extents have at least one corner p with

@@ -243,3 +243,54 @@ def convex_box_deform(f,b):
 
 def matrix_action(m,p):
     return tuple(sum(m[i][j]*p[j] for j in xrange(3)) for i in xrange(3))
+
+
+def line_segment_intersects_box(p,q,b):
+    """
+    Does the line segment between p and q intersect the box b?
+    """
+    (px,py,pz) = p
+    (qx,qy,qz) = q
+    ((minx,maxx),(miny,maxy),(minz,maxz)) = b
+
+    # Do the x coordinates overlap the box? If not, can stop, if so,
+    # can trim the line to the box by x coordinate.
+    if qx<px:
+        (px,py,pz,qx,qy,qz) = (qx,qy,qz,px,py,pz)
+    if qx<minx or maxx<px:
+        return False
+    if px<minx:
+        l = (minx-px)/(qx-px)
+        px = (1-l)*px + l*qx
+        py = (1-l)*py + l*qy
+        pz = (1-l)*pz + l*qz
+    if maxx<qx:
+        l = (maxx-px)/(qx-px)
+        qx = (1-l)*px + l*qx
+        qy = (1-l)*py + l*qy
+        qz = (1-l)*pz + l*qz
+
+    # Do the y coordinates overlap the box? If not, can stop, if so,
+    # can trim the line to the box by y coordinate.
+    if qy<py:
+        (px,py,pz,qx,qy,qz) = (qx,qy,qz,px,py,pz)
+    if qy<miny or maxy<py:
+        return False
+    if py<miny:
+        l = (miny-py)/(qy-py)
+        px = (1-l)*px + l*qx
+        py = (1-l)*py + l*qy
+        pz = (1-l)*pz + l*qz
+    if maxy<qy:
+        l = (maxy-py)/(qy-py)
+        qx = (1-l)*px + l*qx
+        qy = (1-l)*py + l*qy
+        qz = (1-l)*pz + l*qz
+
+    # Now just look at the z coordinates.
+    if qz<pz:
+        (px,py,pz,qx,qy,qz) = (qx,qy,qz,px,py,pz)
+    if qy<miny or maxy<py:
+        return False
+    else:
+        return True
