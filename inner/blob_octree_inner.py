@@ -37,64 +37,55 @@ from octree_inner import *
 
 class BlobTree(Tree):
 
-    def intersection_with_box(self,b):
+    def extent(self):
+        """
+        Returns the bounds ((minx, maxx), (miny, maxy), (minz, maxz)).
+        """
+        raise NotImplementedError
+    
+    def intersection_with_box(self, b):
 
         def point_fn(e):
-            return not boxes_disjoint(e,b)
+            return not boxes_disjoint(e, b)
 
         def box_fn(e):
-            if boxes_disjoint(e,b):
+            if boxes_disjoint(e, b):
                 return False
-            if box_contains(e,b):
+            if box_contains(e, b):
                 return True
             return None
 
         return self.subset_by_extent(point_fn, box_fn)
 
-    def intersect_with_box(self,b):
+    def intersect_with_box(self, b):
         """
         Yield regions whose extents overlap with b.
         """
         def point_fn(e):
-            return not boxes_disjoint(e,b)
+            return not boxes_disjoint(e, b)
 
         def box_fn(e):
-            if boxes_disjoint(e,b):
+            if boxes_disjoint(e, b):
                 return False
-            if box_contains(e,b):
+            if box_contains(e, b):
                 return True
             return None
 
         for t in self.iter_by_extent(point_fn, box_fn):
             yield t
 
-    def intersect_with_line(self,a,v,positive=True):
+    def intersect_with_line(self, a, v, positive=True):
         """
         Yields regions which overlap with the line a+rv. If "positive"
         is true, then r must be positive (so in fact, you are
         intersecting with a halfline).
         """
-        def dot(v1,v2):
-            return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]
-
-        def sub(v1,v2):
-            return (v1[0]-v2[0], v1[1]-v2[1], v1[2]-v2[2])
 
         def point_fn(e):
-            if positive and all(dot(sub(u,a),v) < 0 for u in vertices(e)):
-                return False
-            mins = []
-            maxs = []
-            for (ac,vc,ec) in zip(a,v,e):
-                ec1,ec2 = ec
-                if vc == 0:
-                    if not(ec1 < ac < ec2):
-                        return False
-                else:
-                    r,s = (ec1-ac)/vc, (ec2-ac)/vc
-                    mins.append(min(r,s))
-                    maxs.append(max(r,s))
-            return max(mins) < min(maxs)
+            if positive:
+                return halfline_intersects_box(a, v, e)
+            else:
+                return line_intersects_box(a, v, e)
 
         def box_fn(e):
             return (point_fn(e) and None)
@@ -108,7 +99,7 @@ class BlobTree(Tree):
         """
 
         def point_fn(e):
-            return line_segment_intersects_box(a,b,e)
+            return line_segment_intersects_box(a, b, e)
 
         def box_fn(e):
             return (point_fn(e) and None)
@@ -125,10 +116,10 @@ class BlobTree(Tree):
         """
 
         def point_fn(e):
-            return box_intersects_plane(e,f)
+            return box_intersects_plane(e, f)
 
         def box_fn(e):
-            return box_intersects_plane(e,f) and None
+            return box_intersects_plane(e, f) and None
 
         return self.iter_by_extent(point_fn, box_fn)
 
@@ -149,15 +140,15 @@ class BlobEmpty(BlobTree, Empty):
     def reroot(self):
         return self
 
-    def possible_overlaps(self,other):
+    def possible_overlaps(self, other):
         return
         yield
 
-    def by_possible_overlap(self,other):
+    def by_possible_overlap(self, other):
         return
         yield
 
-    def debug_description(self,indent):
+    def debug_description(self, indent):
         print "  "*indent + "Empty"
 
 BlobTree.empty = BlobEmpty
@@ -185,16 +176,16 @@ class BlobSingleton(BlobTree, Singleton):
     def reroot(self):
         return self
 
-    def possible_overlaps(self,other):
+    def possible_overlaps(self, other):
         t1 = self.data_triple()
         for t2 in other.intersect_with_box(self.extent()):
-            yield (t1,t2)
+            yield (t1, t2)
 
-    def by_possible_overlap(self,other):
+    def by_possible_overlap(self, other):
         e = self.data[0]
-        yield (self.data_triple(),list(other.intersect_with_box(e)))
+        yield (self.data_triple(), list(other.intersect_with_box(e)))
 
-    def debug_description(self,indent):
+    def debug_description(self, indent):
         print "  "*indent + "Singleton at %s with bounds %s and data %s"%(self.data_triple())
 
 BlobTree.singleton = BlobSingleton
@@ -222,10 +213,10 @@ class BlobNode(BlobTree, Node):
     def extent(self):
         return self.cached_extent
 
-    def subset_by_extent(self,point_fn,box_fn):
+    def subset_by_extent(self, point_fn, box_fn):
         a = box_fn(self.extent())
         if a is None:
-            return self.smartnode([t.subset_by_extent(point_fn,box_fn) for t in self.children_no_bounds()])
+            return self.smartnode([t.subset_by_extent(point_fn, box_fn) for t in self.children_no_bounds()])
         elif a:
             return self
         else:
@@ -238,8 +229,8 @@ class BlobNode(BlobTree, Node):
                 for r in t.iter_by_extent(point_fn, box_fn):
                     yield r
         elif a:
-            for (p,(b,d)) in self:
-                yield (p,b,d)
+            for (p, (b, d)) in self:
+                yield (p, b, d)
 
     def reroot(self):
         """

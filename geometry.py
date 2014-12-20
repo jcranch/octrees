@@ -297,6 +297,42 @@ def line_segment_intersects_box(p,q,b):
         return True
 
 
+def line_intersects_box(a, v, b):
+    """
+    Does the line a+rv meet the box b?
+    """
+    mins = []
+    maxs = []
+    for (ac, vc, ec) in zip(a, v, b):
+        ec1, ec2 = ec
+        if vc == 0:
+            if not(min(ec1, ec2) <= ac <= max(ec1, ec2)):
+                return False
+        else:
+            r,s = (ec1-ac)/vc, (ec2-ac)/vc
+            mins.append(min(r,s))
+            maxs.append(max(r,s))
+    return max(mins) <= min(maxs)
+            
+
+
+def halfline_intersects_box(a, v, b):
+    """
+    Does the halfline a+rv with r positive meet the box b?
+    """
+    mins = []
+    maxs = []
+    for (ac, vc, ec) in zip(a, v, b):
+        ec1, ec2 = ec
+        if vc == 0:
+            if not(min(ec1, ec2) <= ac <= max(ec1, ec2)):
+                return False
+        else:
+            r,s = (ec1-ac)/vc, (ec2-ac)/vc
+            mins.append(min(r,s))
+            maxs.append(max(r,s))
+    return max(mins) <= min(maxs) and 0 <= min(maxs)
+
 
 def box_intersects_plane(b,f):
     """

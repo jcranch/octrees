@@ -36,18 +36,17 @@ import heapq
 from octrees.geometry import *
 
 
-
 class Tree():
 
     def smartnode(self, data):
         if len(data) != 8:
-            (((a,b),(c,d)),((e,f),(g,h))) = data
-            data = [a,b,c,d,e,f,g,h]
+            (((a, b), (c, d)), ((e, f), (g, h))) = data
+            data = [a, b, c, d, e, f, g, h]
         singleton = None
         for x in data:
-            if isinstance(x,Node):
+            if isinstance(x, Node):
                 return self.node(data)
-            elif isinstance(x,Singleton):
+            elif isinstance(x, Singleton):
                 if singleton is not None:
                     return self.node(data)
                 else:
@@ -56,7 +55,6 @@ class Tree():
             return singleton
         else:
             return self.empty()
-
 
 
 class Empty(Tree):
@@ -71,8 +69,8 @@ class Empty(Tree):
     def __len__(self):
         return 0
 
-    def __eq__(self,other):
-        return isinstance(other,Empty)
+    def __eq__(self, other):
+        return isinstance(other, Empty)
 
     def __hash__(self):
         return hash((self.empty,))
@@ -107,7 +105,6 @@ class Empty(Tree):
 Tree.empty = Empty
 
 
-
 class Singleton(Tree):
 
     def __init__(self, coords, data):
@@ -120,11 +117,13 @@ class Singleton(Tree):
     def __iter__(self):
         yield (self.coords, self.data)
 
-    def __eq__(self,other):
-        return isinstance(other,Singleton) and self.coords == other.coords and self.data == other.data
+    def __eq__(self, other):
+        return (isinstance(other, Singleton)
+                and self.coords == other.coords
+                and self.data == other.data)
 
     def __hash__(self):
-        return hash((self.singleton,coords,data))
+        return hash((self.singleton, coords, data))
 
     def get(self, bounds, coords, default):
         if self.coords == coords:
@@ -134,15 +133,15 @@ class Singleton(Tree):
 
     def insert(self, bounds, coords, data):
         if self.coords == coords:
-            raise KeyError("Key (%s,%s,%s) already present"%(self.coords))
+            raise KeyError("Key (%s,%s,%s) already present" % (self.coords))
         else:
-            return self.node().insert(bounds,self.coords,self.data).insert(bounds,coords,data)
+            return self.node().insert(bounds, self.coords, self.data).insert(bounds, coords, data)
 
     def update(self, bounds, coords, data):
         if self.coords == coords:
             return self.singleton(coords, data)
         else:
-            return self.node().insert(bounds,self.coords,self.data).insert(bounds,coords,data)
+            return self.node().insert(bounds, self.coords, self.data).insert(bounds, coords, data)
 
     def remove(self, bounds, coords):
         if self.coords == coords:
@@ -189,9 +188,9 @@ class Node(Tree):
         """
         if content is None:
             content = [self.empty()]*8
-        if len(content)==8:
-            (a,b,c,d,e,f,g,h) = content
-            self.content = (((a,b),(c,d)),((e,f),(g,h)))
+        if len(content) == 8:
+            (a, b, c, d, e, f, g, h) = content
+            self.content = (((a, b), (c, d)), ((e, f), (g, h)))
         else:
             self.content = tuple(tuple(tuple(b) for b in a) for a in content)
 
@@ -205,34 +204,34 @@ class Node(Tree):
                     for t in iter(z):
                         yield t
 
-    def __eq__(self,other):
-        return isinstance(other,Node) and self.content_array() == other.content_array()
+    def __eq__(self, other):
+        return isinstance(other, Node) and self.content_array() == other.content_array()
 
     def __hash__(self):
-        return hash((self.node,content))
+        return hash((self.node, content))
 
     def content_array(self):
         return [[list(b) for b in a] for a in self.content]
 
     def get(self, bounds, coords, default):
-        ((r,s,t),newbounds) = narrow(bounds, coords)
+        ((r, s, t), newbounds) = narrow(bounds, coords)
         return self.content_array()[r][s][t].get(newbounds, coords, default)
 
     def insert(self, bounds, coords, data):
         a = self.content_array()
-        ((r,s,t),newbounds) = narrow(bounds, coords)
+        ((r, s, t), newbounds) = narrow(bounds, coords)
         a[r][s][t] = a[r][s][t].insert(newbounds, coords, data)
         return self.node(a)
 
     def update(self, bounds, coords, data):
         a = self.content_array()
-        ((r,s,t),newbounds) = narrow(bounds, coords)
+        ((r, s, t), newbounds) = narrow(bounds, coords)
         a[r][s][t] = a[r][s][t].update(newbounds, coords, data)
         return self.node(a)
 
     def remove(self, bounds, coords):
         a = self.content_array()
-        ((r,s,t),newbounds) = narrow(bounds, coords)
+        ((r, s, t), newbounds) = narrow(bounds, coords)
         a[r][s][t] = a[r][s][t].remove(newbounds, coords)
         return self.smartnode(a)
 
@@ -243,13 +242,13 @@ class Node(Tree):
                     yield w
 
     def children(self, bounds):
-        for (b,x) in zip(subboxes(bounds), self.children_no_bounds()):
-            yield (b,x)
+        for (b, x) in zip(subboxes(bounds), self.children_no_bounds()):
+            yield (b, x)
 
     def subset(self, bounds, point_fn, box_fn):
         x = box_fn(bounds)
         if x is None:
-            return self.smartnode(list(t.subset(b,point_fn,box_fn) for (b,t) in self.children(bounds)))
+            return self.smartnode(list(t.subset(b, point_fn, box_fn) for (b, t) in self.children(bounds)))
         elif x:
             return self
         else:
@@ -259,10 +258,10 @@ class Node(Tree):
         s = boxscore(bounds)
         if s is not None:
             heapq.heappush(heap, (s, True, bounds, self))
-        
+
     def union(self, other, bounds, swapped=False):
         if swapped:
-            return self.node([x.union(y,b) for (x,y,b) in zip(self.children_no_bounds(), other.children_no_bounds(), subboxes(bounds))])
+            return self.node([x.union(y, b) for (x, y, b) in zip(self.children_no_bounds(), other.children_no_bounds(), subboxes(bounds))])
         else:
             return other.union(self, bounds, swapped=True)
 
@@ -272,7 +271,7 @@ class Node(Tree):
         elif boxes_disjoint(oldbounds, newbounds):
             return self.empty()
         else:
-            return reduce(lambda x,y:x.union(y,newbounds), (x.rebound(b,newbounds) for (b,x) in self.children(oldbounds)))
+            return reduce(lambda x, y: x.union(y, newbounds), (x.rebound(b, newbounds) for (b, x) in self.children(oldbounds)))
 
     def deform(self, oldbounds, newbounds, point_fn, box_fn):
         if box_contains(oldbounds, newbounds):
@@ -280,7 +279,6 @@ class Node(Tree):
         elif boxes_disjoint(box_fn(oldbounds), newbounds):
             return self.empty()
         else:
-            return reduce(lambda x,y:x.union(y,newbounds), (x.deform(b,newbounds,point_fn,box_fn) for (b,x) in self.children(oldbounds)))
+            return reduce(lambda x, y: x.union(y, newbounds), (x.deform(b, newbounds, point_fn, box_fn) for (b, x) in self.children(oldbounds)))
 
 Tree.node = Node
-
