@@ -135,13 +135,15 @@ class Singleton(Tree):
         if self.coords == coords:
             raise KeyError("Key (%s,%s,%s) already present" % (self.coords))
         else:
-            return self.node().insert(bounds, self.coords, self.data).insert(bounds, coords, data)
+            return self.node().insert(bounds, self.coords,
+                                      self.data).insert(bounds, coords, data)
 
     def update(self, bounds, coords, data):
         if self.coords == coords:
             return self.singleton(coords, data)
         else:
-            return self.node().insert(bounds, self.coords, self.data).insert(bounds, coords, data)
+            return self.node().insert(bounds, self.coords,
+                                      self.data).insert(bounds, coords, data)
 
     def remove(self, bounds, coords):
         if self.coords == coords:
@@ -195,7 +197,8 @@ class Node(Tree):
             self.content = tuple(tuple(tuple(b) for b in a) for a in content)
 
     def __len__(self):
-        return sum(sum(sum(len(x) for x in b) for b in a) for a in self.content)
+        return sum(sum(sum(len(x) for x in b) for b in a)
+                   for a in self.content)
 
     def __iter__(self):
         for x in self.content:
@@ -205,7 +208,8 @@ class Node(Tree):
                         yield t
 
     def __eq__(self, other):
-        return isinstance(other, Node) and self.content_array() == other.content_array()
+        return (isinstance(other, Node)
+                and self.content_array() == other.content_array())
 
     def __hash__(self):
         return hash((self.node, content))
@@ -248,7 +252,8 @@ class Node(Tree):
     def subset(self, bounds, point_fn, box_fn):
         x = box_fn(bounds)
         if x is None:
-            return self.smartnode(list(t.subset(b, point_fn, box_fn) for (b, t) in self.children(bounds)))
+            return self.smartnode(list(t.subset(b, point_fn, box_fn)
+                                       for (b, t) in self.children(bounds)))
         elif x:
             return self
         else:
@@ -261,24 +266,33 @@ class Node(Tree):
 
     def union(self, other, bounds, swapped=False):
         if swapped:
-            return self.node([x.union(y, b) for (x, y, b) in zip(self.children_no_bounds(), other.children_no_bounds(), subboxes(bounds))])
+            return self.node([x.union(y, b)
+                              for (x, y, b) in zip(self.children_no_bounds(),
+                                                   other.children_no_bounds(),
+                                                   subboxes(bounds))])
         else:
             return other.union(self, bounds, swapped=True)
 
     def rebound(self, oldbounds, newbounds):
         if box_contains(oldbounds, newbounds):
-            return self.node([self.rebound(oldbounds, b) for b in subboxes(newbounds)])
+            return self.node([self.rebound(oldbounds, b)
+                              for b in subboxes(newbounds)])
         elif boxes_disjoint(oldbounds, newbounds):
             return self.empty()
         else:
-            return reduce(lambda x, y: x.union(y, newbounds), (x.rebound(b, newbounds) for (b, x) in self.children(oldbounds)))
+            return reduce(lambda x, y: x.union(y, newbounds),
+                          (x.rebound(b, newbounds)
+                           for (b, x) in self.children(oldbounds)))
 
     def deform(self, oldbounds, newbounds, point_fn, box_fn):
         if box_contains(oldbounds, newbounds):
-            return self.node([self.deform(oldbounds, b, point_fn, box_fn) for b in subboxes(newbounds)])
+            return self.node([self.deform(oldbounds, b, point_fn, box_fn)
+                              for b in subboxes(newbounds)])
         elif boxes_disjoint(box_fn(oldbounds), newbounds):
             return self.empty()
         else:
-            return reduce(lambda x, y: x.union(y, newbounds), (x.deform(b, newbounds, point_fn, box_fn) for (b, x) in self.children(oldbounds)))
+            return reduce(lambda x, y: x.union(y, newbounds),
+                          (x.deform(b, newbounds, point_fn, box_fn)
+                           for (b, x) in self.children(oldbounds)))
 
 Tree.node = Node

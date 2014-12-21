@@ -34,7 +34,6 @@ from octrees.geometry import *
 from octree_inner import *
 
 
-
 class BlobTree(Tree):
 
     def extent(self):
@@ -42,7 +41,7 @@ class BlobTree(Tree):
         Returns the bounds ((minx, maxx), (miny, maxy), (minz, maxz)).
         """
         raise NotImplementedError
-    
+
     def intersection_with_box(self, b):
 
         def point_fn(e):
@@ -124,9 +123,8 @@ class BlobTree(Tree):
         return self.iter_by_extent(point_fn, box_fn)
 
 
-
 class BlobEmpty(BlobTree, Empty):
-    
+
     def extent(self):
         return None
 
@@ -152,7 +150,6 @@ class BlobEmpty(BlobTree, Empty):
         print "  "*indent + "Empty"
 
 BlobTree.empty = BlobEmpty
-
 
 
 class BlobSingleton(BlobTree, Singleton):
@@ -186,10 +183,11 @@ class BlobSingleton(BlobTree, Singleton):
         yield (self.data_triple(), list(other.intersect_with_box(e)))
 
     def debug_description(self, indent):
-        print "  "*indent + "Singleton at %s with bounds %s and data %s"%(self.data_triple())
+        s = "Singleton at %s with bounds %s and data %s" % (
+            self.data_triple())
+        print "  "*indent + s
 
 BlobTree.singleton = BlobSingleton
-
 
 
 class BlobNode(BlobTree, Node):
@@ -216,13 +214,14 @@ class BlobNode(BlobTree, Node):
     def subset_by_extent(self, point_fn, box_fn):
         a = box_fn(self.extent())
         if a is None:
-            return self.smartnode([t.subset_by_extent(point_fn, box_fn) for t in self.children_no_bounds()])
+            return self.smartnode([t.subset_by_extent(point_fn, box_fn)
+                                   for t in self.children_no_bounds()])
         elif a:
             return self
         else:
             return self.empty()
 
-    def iter_by_extent(self,point_fn,box_fn):
+    def iter_by_extent(self, point_fn, box_fn):
         a = box_fn(self.extent())
         if a is None:
             for t in self.children_no_bounds():
@@ -240,29 +239,30 @@ class BlobNode(BlobTree, Node):
         Useful in a couple of algorithms.
         """
         l = list(self.children_no_bounds())
-        s = sum(isinstance(x,BlobEmpty) for x in l)
+        s = sum(isinstance(x, BlobEmpty) for x in l)
         if s == 7:
             for x in l:
-                if not isinstance(x,BlobEmpty):
+                if not isinstance(x, BlobEmpty):
                     return x.reroot()
         else:
             return self
 
-    def possible_overlaps(self,other):
+    def possible_overlaps(self, other):
         o = other.intersection_with_box(self.extent()).reroot()
         for s in self.children_no_bounds():
             for x in s.possible_overlaps(o):
                 yield x
 
-    def by_possible_overlap(self,other):
+    def by_possible_overlap(self, other):
         for s in self.children_no_bounds():
             e = s.extent()
             if e is not None:
-                for x in s.by_possible_overlap(other.intersection_with_box(e).reroot()):
+                a = other.intersection_with_box(e).reroot()
+                for x in s.by_possible_overlap(a):
                     yield x
 
-    def debug_description(self,indent):
-        print "  "*indent + "Node with extent %s:"%(self.extent(),)
+    def debug_description(self, indent):
+        print "  "*indent + "Node with extent %s:" % (self.extent(),)
         for s in self.children_no_bounds():
             s.debug_description(indent+1)
 
