@@ -22,7 +22,7 @@ Octrees
 
 """
 
-from octrees import Octree
-from blob_octrees import BlobOctree
+from .octrees import Octree
+from .blob_octrees import BlobOctree
 
-import geometry
+from . import geometry

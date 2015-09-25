@@ -25,8 +25,8 @@ from __future__ import division
 
 import heapq
 
-from geometry import *
-from inner.octree_inner import *
+from .geometry import *
+from .inner.octree_inner import *
 
 
 class Octree():

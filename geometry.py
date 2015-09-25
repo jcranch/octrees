@@ -248,7 +248,7 @@ def convex_box_deform(f, b):
 
 
 def matrix_action(m, p):
-    return tuple(sum(m[i][j]*p[j] for j in xrange(3)) for i in xrange(3))
+    return tuple(sum(m[i][j]*p[j] for j in range(3)) for i in range(3))
 
 
 def line_segment_intersects_box(p, q, b):
@@ -280,7 +280,7 @@ def line_segment_intersects_box(p, q, b):
     # can trim the line to the box by y coordinate.
     if qy < py:
         (px, py, pz, qx, qy, qz) = (qx, qy, qz, px, py, pz)
-        print "swapping; p = %s, q = %s" % ((px, py, pz), (qx, qy, qz))
+        print("swapping; p = %s, q = %s" % ((px, py, pz), (qx, qy, qz)))
     if qy < miny or maxy < py:
         return False
     if py < miny:
