@@ -30,7 +30,7 @@ directly.
 
 from __future__ import division
 
-from octrees.geometry import *
+from ..geometry import *
 from .octree_inner import *
 
 
