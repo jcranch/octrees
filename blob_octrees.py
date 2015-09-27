@@ -23,8 +23,8 @@ Blob octrees
 
 from __future__ import division
 
-from geometry import *
-from inner.blob_octree_inner import *
+from .geometry import *
+from .inner.blob_octree_inner import *
 
 
 class BlobOctree():
@@ -163,5 +163,5 @@ class BlobOctree():
         """
         Describes the tree structure, for debugging purposes.
         """
-        print "Octree with bounds %s:" % (self.bounds,)
+        print("Octree with bounds %s:" % (self.bounds,))
         self.tree.debug_description(1)

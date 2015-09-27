@@ -32,8 +32,9 @@ directly.
 from __future__ import division
 
 import heapq
+from functools import reduce
 
-from octrees.geometry import *
+from ..geometry import *
 
 
 class Tree():

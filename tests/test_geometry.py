@@ -52,17 +52,17 @@ class GeometryTests(TestCase):
                 self.random_interval(n, a, b))
 
     def test_point_against_box(self):
-        for i in xrange(10):
+        for i in range(10):
             b = self.random_box(100, 2, 0)
 
-            for j in xrange(10):
+            for j in range(10):
                 p = self.random_point(100, 2, 1)
 
                 d = max(euclidean_point_point(p, v) for v in vertices(b))
                 self.assertEqual(euclidean_point_box_max(p, b), d)
 
     def test_box_against_box(self):
-        for i in xrange(10):
+        for i in range(10):
             a = self.random_box(100, 2, 0)
             b = self.random_box(100, 2, 1)
 

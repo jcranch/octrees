@@ -30,8 +30,8 @@ directly.
 
 from __future__ import division
 
-from octrees.geometry import *
-from octree_inner import *
+from ..geometry import *
+from .octree_inner import *
 
 
 class BlobTree(Tree):
@@ -147,7 +147,7 @@ class BlobEmpty(BlobTree, Empty):
         yield
 
     def debug_description(self, indent):
-        print "  "*indent + "Empty"
+        print("  "*indent + "Empty")
 
 BlobTree.empty = BlobEmpty
 
@@ -185,7 +185,7 @@ class BlobSingleton(BlobTree, Singleton):
     def debug_description(self, indent):
         s = "Singleton at %s with bounds %s and data %s" % (
             self.data_triple())
-        print "  "*indent + s
+        print("  "*indent + s)
 
 BlobTree.singleton = BlobSingleton
 
@@ -262,7 +262,7 @@ class BlobNode(BlobTree, Node):
                     yield x
 
     def debug_description(self, indent):
-        print "  "*indent + "Node with extent %s:" % (self.extent(),)
+        print ("  "*indent + "Node with extent %s:" % (self.extent(),))
         for s in self.children_no_bounds():
             s.debug_description(indent+1)
 
