@@ -19,6 +19,10 @@
 A simple octree library
 
 (C) James Cranch 2013-2014
+
+Can be constructed in two ways:
+  Octree(bounds) - an empty octree
+  octree_from_list(bounds, l) - turns list l into an octree
 """
 
 from __future__ import division
@@ -520,3 +524,14 @@ class Octree():
 
         for t in self.pairs_generate(other, p_p_fn, p_b_fn, b_p_fn, b_b_fn):
             yield t
+
+
+def octree_from_list(bounds, l):
+    """
+    Constructs octree from list l.
+
+    After construction, l will still exist, but its order may have
+    been altered in doing so.
+    """
+    o = octree_from_list_inner(bounds, l, 0, len(l))
+    return Octree(bounds, o)

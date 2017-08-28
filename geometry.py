@@ -85,9 +85,7 @@ def vertices(bounds):
 def subboxes(bounds):
     "The eight boxes contained within a box"
     ((minx, maxx), (miny, maxy), (minz, maxz)) = bounds
-    midx = (maxx+minx)/2
-    midy = (maxy+miny)/2
-    midz = (maxz+minz)/2
+    (midx,midy,midz) = centroid(bounds)
     for bx in [(minx, midx), (midx, maxx)]:
         for by in [(miny, midy), (midy, maxy)]:
             for bz in [(minz, midz), (midz, maxz)]:
@@ -98,10 +96,7 @@ def narrow(bounds, coords):
     "Narrow down a box to an appropriate subbox"
 
     ((minx, maxx), (miny, maxy), (minz, maxz)) = bounds
-
-    midx = (maxx+minx)/2
-    midy = (maxy+miny)/2
-    midz = (maxz+minz)/2
+    (midx,midy,midz) = centroid(bounds)
 
     (x, y, z) = coords
 

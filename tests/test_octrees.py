@@ -26,7 +26,7 @@ from __future__ import division
 from unittest import TestCase
 from math import sin
 
-from octrees import Octree
+from octrees import Octree, octree_from_list
 from ..geometry import *
 
 
@@ -62,6 +62,20 @@ class BasicTests(TestCase):
         self.assertEqual(len(self.o), 3)
         self.o.insert((0.98, 0.23, 0.15), "Point four")
         self.assertEqual(len(self.o), 4)
+
+
+class BuilderTests(TestCase):
+
+    def setUp(self):
+        b = ((-1.0, 1.0), (-1.0, 1.0), (-1.0, 1.0))
+        points = [((sin(0.1*t), sin(0.2*t), sin(0.3*t)), t)
+                  for t in xrange(50)]
+        self.o1 = Octree(b)
+        self.o1.extend(points)
+        self.o2 = octree_from_list(b, points)
+
+    def test_equality(self):
+        self.assertEqual(self.o1, self.o2)
 
 
 class GeometricTests(TestCase):

@@ -34,6 +34,7 @@ from __future__ import division
 import heapq
 
 from octrees.geometry import *
+from misc import pivot
 
 
 class Tree():
@@ -296,3 +297,25 @@ class Node(Tree):
                            for (b, x) in self.children(oldbounds)))
 
 Tree.node = Node
+
+
+def octree_from_list_inner(bounds, l, start, stop):
+    if start == stop:
+        return Empty()
+    elif start+1 == stop:
+        (p,d) = l[start]
+        return Singleton(p,d)
+    else:
+        (midx, midy, midz) = centroid(bounds)
+        n4 = pivot(l, lambda t: t[0][0]<midx, start, stop)
+        n2 = pivot(l, lambda t: t[0][1]<midy, start, n4)
+        n6 = pivot(l, lambda t: t[0][1]<midy, n4, stop)
+        n1 = pivot(l, lambda t: t[0][2]<midz, start, n2)
+        n3 = pivot(l, lambda t: t[0][2]<midz, n2, n4)
+        n5 = pivot(l, lambda t: t[0][2]<midz, n4, n6)
+        n7 = pivot(l, lambda t: t[0][2]<midz, n6, stop)
+        return Node([octree_from_list_inner(b, l, r, s)
+                     for (b,r,s) in zip(
+                             subboxes(bounds),
+                             [start, n1, n2, n3, n4, n5, n6, n7],
+                             [n1, n2, n3, n4, n5, n6, n7, stop])])
