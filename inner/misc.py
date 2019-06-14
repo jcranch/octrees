@@ -26,8 +26,8 @@ def pivot(l, f, start, stop):
     Swap elements of l over so that, in the range l[start:stop], all
     elements satisfying f precede all those which don't.
 
-    Returns the pivot point n such that l[start:n] all do and
-    l[n:stop] all don't.
+    Return the pivot point n such that l[start:n] all do and l[n:stop]
+    all don't.
     """
     while start < stop:
         if f(l[start]):

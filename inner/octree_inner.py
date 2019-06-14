@@ -20,11 +20,10 @@ The core functionality: a purely functional implementation. We have
 this two-layer setup so that octree nodes do not have to store their
 own bounds.
 
-Also, people used to python expect mutable data structures; mutability
-is most easily provided using a wrapper.
+Also, people who are used to python expect mutable data structures;
+mutability is most easily provided using a wrapper.
 
-The user should probably not ever want to import or use this code
-directly.
+The user may well not ever want to import or use this code directly.
 
 (C) James Cranch 2013--2019
 """

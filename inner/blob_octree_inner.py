@@ -22,6 +22,9 @@ point, each node stores a box describing the extent of its contents
 (which may well exceed the bounds for the associated points it will
 store).
 
+This is a purely functional data structure, wrapped by blob_octree.py
+in the main directory.
+
 The user should probably not ever want to import or use this code
 directly.
 
