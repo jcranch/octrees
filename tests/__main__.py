@@ -1,5 +1,5 @@
 #    Octrees in Python
-#    Copyright (C) 2013--14  James Cranch
+#    Copyright (C) 2013--19  James Cranch
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -14,6 +14,12 @@
 #    You should have received a copy of the GNU General Public License along
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+"""
+Octrees in Python
+
+(C) James Cranch 2013--2019
+"""
 
 from unittest import main
 
