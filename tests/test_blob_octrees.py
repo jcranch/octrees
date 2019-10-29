@@ -1,5 +1,5 @@
 #    Octrees in Python
-#    Copyright (C) 2013--19  James Cranch
+#    Copyright (C) 2013--2019  James Cranch
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,13 +21,11 @@ Unit testing for the octrees library
 (C) James Cranch 2013--2019
 """
 
-from __future__ import division
-
 from unittest import TestCase
 from math import sin
 
-from octrees import BlobOctree
-from ..geometry import *
+from blob_octrees import BlobOctree
+from geometry import *
 
 
 class BlobTests(TestCase):
@@ -37,11 +35,11 @@ class BlobTests(TestCase):
         self.o2 = BlobOctree(((-1.0, 1.0), (-1.0, 1.0), (-1.0, 1.0)))
 
         self.coords = [(sin(0.1*t), sin(0.2*t), sin(0.3*t))
-                       for t in xrange(100)]
+                       for t in range(100)]
         m = 0.1
         self.extents = [((x-m, x+m), (y-m, y+m), (z-m, z+m))
                         for (x, y, z) in self.coords]
-        arguments = zip(self.coords, self.extents, xrange(100))
+        arguments = list(zip(self.coords, self.extents, range(100)))
 
         self.o1.extend(arguments[:50])
         self.o2.extend(arguments[50:])
@@ -51,12 +49,12 @@ class BlobTests(TestCase):
         self.assertEqual(set(self.o1),
                          set(zip(self.coords[:50],
                                  self.extents[:50],
-                                 xrange(50))))
+                                 range(50))))
         self.assertEqual(len(self.o2), 50)
         self.assertEqual(set(self.o2),
                          set(zip(self.coords[50:],
                                  self.extents[50:],
-                                 xrange(50, 100))))
+                                 range(50, 100))))
 
     def test_intersect_with_box(self):
         b1 = ((-0.5, 0.5), (-0.2, 0.8), (-0.7, 0.3))
@@ -73,7 +71,7 @@ class BlobTests(TestCase):
 
         d2 = dict(self.o1.by_possible_overlap(self.o2))
 
-        s2 = set((x[2], y[2]) for (x, l) in d2.iteritems() for y in l)
+        s2 = set((x[2], y[2]) for (x, l) in d2.items() for y in l)
 
         s3 = set((x[2], y[2])
                  for x in self.o1
@@ -89,11 +87,11 @@ class BlobTests(TestCase):
         self.assertEqual(s3, s0)
 
     def test_intersect_with_line(self):
-        for xi in xrange(-8, 8, 2):
+        for xi in range(-8, 8, 2):
             x = xi/10
-            for yi in xrange(-8, 8, 2):
+            for yi in range(-8, 8, 2):
                 y = yi/10
-                for zi in xrange(-8, 8, 2):
+                for zi in range(-8, 8, 2):
                     z = zi/10
 
                     def decent(t):
@@ -109,9 +107,9 @@ class BlobTests(TestCase):
         s0 = set(self.o1.intersect_with_line_segment((-0.5, -0.5, -0.5),
                                                      (0.5, 0.5, 0.5)))
         s1 = set()
-        for t in zip(self.coords, self.extents, xrange(50)):
+        for t in zip(self.coords, self.extents, range(50)):
             (p, b, n) = t
-            for i in xrange(-500, 501):
+            for i in range(-500, 501):
                 x = (i/1000.0, i/1000.0, i/1000.0)
                 if point_in_box(x, b):
                     s1.add(t)
@@ -124,7 +122,7 @@ class BlobTests(TestCase):
 
             s0 = set(self.o1.intersect_with_plane(fn))
             s1 = set()
-            for t in zip(self.coords, self.extents, xrange(50)):
+            for t in zip(self.coords, self.extents, range(50)):
                 (_, b, _) = t
                 if b[d][0] <= 0.25 <= b[d][1]:
                     s1.add(t)

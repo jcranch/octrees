@@ -1,5 +1,5 @@
 #    Octrees in Python
-#    Copyright (C) 2013--19  James Cranch
+#    Copyright (C) 2013--2019  James Cranch
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,13 +21,11 @@ Unit testing for the octrees library
 (C) James Cranch 2013--2019
 """
 
-from __future__ import division
-
 from unittest import TestCase
 from math import sin
 
 from octrees import Octree, octree_from_list
-from ..geometry import *
+from geometry import *
 
 
 class BasicTests(TestCase):
@@ -69,7 +67,7 @@ class BuilderTests(TestCase):
     def setUp(self):
         b = ((-1.0, 1.0), (-1.0, 1.0), (-1.0, 1.0))
         points = [((sin(0.1*t), sin(0.2*t), sin(0.3*t)), t)
-                  for t in xrange(50)]
+                  for t in range(50)]
         self.o1 = Octree(b)
         self.o1.extend(points)
         self.o2 = octree_from_list(b, points)
@@ -82,7 +80,7 @@ class GeometricTests(TestCase):
 
     def setUp(self):
         self.coords = set((sin(0.1*t), sin(0.2*t), sin(0.3*t))
-                          for t in xrange(50))
+                          for t in range(50))
         self.o = Octree(((-1.0, 1.0), (-1.0, 1.0), (-1.0, 1.0)))
         self.o.extend((p, True) for p in self.coords)
 
@@ -197,11 +195,11 @@ class GeometricTests(TestCase):
 
     def test_point_within_distance(self):
         epsilon = 0.1
-        for t in xrange(150, 200):
+        for t in range(150, 200):
             p = (sin(0.1*t), sin(0.2*t), sin(0.3*t))
 
             try:
-                self.o.by_distance_from_point(p, epsilon).next()
+                next(self.o.by_distance_from_point(p, epsilon))
                 f_computed = True
             except StopIteration:
                 f_computed = False
@@ -219,12 +217,12 @@ class BinaryTests(TestCase):
 
     def setUp(self):
         self.coords1 = set((sin(0.1*t), sin(0.2*t), sin(0.3*t))
-                           for t in xrange(50))
+                           for t in range(50))
         self.o1 = Octree(((-1.0, 1.0), (-1.0, 1.0), (-1.0, 1.0)))
         self.o1.extend((p, None) for p in self.coords1)
 
         self.coords2 = set((sin(0.1*t), sin(0.2*t), sin(0.3*t))
-                           for t in xrange(150, 200))
+                           for t in range(150, 200))
         self.o2 = Octree(((-1.0, 1.0), (-1.0, 1.0), (-1.0, 1.0)))
         self.o2.extend((p, None) for p in self.coords2)
 

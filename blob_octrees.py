@@ -1,5 +1,5 @@
 #    Octrees in Python
-#    Copyright (C) 2013--19  James Cranch
+#    Copyright (C) 2013--2019  James Cranch
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,13 +21,11 @@ Blob octrees
 (C) James Cranch 2013--2019
 """
 
-from __future__ import division
-
 from geometry import *
 from inner.blob_octree_inner import *
 
 
-class BlobOctree():
+class BlobOctree(object):
     """
     Blob Octrees: an efficient data structure for data associated with
     regions in 3D space. Each region must be associated to a reference
@@ -163,5 +161,5 @@ class BlobOctree():
         """
         Describes the tree structure, for debugging purposes.
         """
-        print "Octree with bounds %s:" % (self.bounds,)
+        print(f"Octree with bounds {self.bounds}:")
         self.tree.debug_description(1)

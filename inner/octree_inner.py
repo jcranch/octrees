@@ -1,5 +1,5 @@
 #    Octrees in Python
-#    Copyright (C) 2013--19  James Cranch
+#    Copyright (C) 2013--2019  James Cranch
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,25 +20,29 @@ The core functionality: a purely functional implementation. We have
 this two-layer setup so that octree nodes do not have to store their
 own bounds.
 
-Also, people who are used to python expect mutable data structures;
-mutability is most easily provided using a wrapper.
+Also, people used to python expect mutable data structures; mutability
+is most easily provided using a wrapper.
 
-The user may well not ever want to import or use this code directly.
+The user should probably not ever want to import or use this code
+directly.
 
 (C) James Cranch 2013--2019
 """
 
-from __future__ import division
-
+from functools import reduce
 import heapq
 
-from octrees.geometry import *
-from misc import pivot
+from geometry import *
+from inner.misc import pivot
 
 
-class Tree():
+class Tree(object):
 
     def smartnode(self, data):
+        """
+        Assembles the given octants into a node.
+        """
+
         if len(data) != 8:
             (((a, b), (c, d)), ((e, f), (g, h))) = data
             data = [a, b, c, d, e, f, g, h]
@@ -208,8 +212,10 @@ class Node(Tree):
                         yield t
 
     def __eq__(self, other):
-        return (isinstance(other, Node)
-                and self.content_array() == other.content_array())
+        if isinstance(other, Node):
+            return self.content_array() == other.content_array()
+        else:
+            return False
 
     def __hash__(self):
         return hash((self.node, content))

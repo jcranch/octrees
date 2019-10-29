@@ -1,5 +1,5 @@
 #    Octrees in Python
-#    Copyright (C) 2013--19  James Cranch
+#    Copyright (C) 2013--2019 James Cranch
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ Some supporting 3D geometric code
 (C) James Cranch 2013--2019
 """
 
-from __future__ import division
 from math import sqrt
 
 
@@ -260,7 +259,7 @@ def convex_box_deform(f, b):
 
 
 def matrix_action(m, p):
-    return tuple(sum(m[i][j]*p[j] for j in xrange(3)) for i in xrange(3))
+    return tuple(sum(m[i][j]*p[j] for j in range(3)) for i in range(3))
 
 
 def line_segment_intersects_box(p, q, b):
@@ -292,7 +291,7 @@ def line_segment_intersects_box(p, q, b):
     # can trim the line to the box by y coordinate.
     if qy < py:
         (px, py, pz, qx, qy, qz) = (qx, qy, qz, px, py, pz)
-        print "swapping; p = %s, q = %s" % ((px, py, pz), (qx, qy, qz))
+        print(f"swapping; p = {(px, py, pz)}, q = {(qx, qy, qz)}")
     if qy < miny or maxy < py:
         return False
     if py < miny:
