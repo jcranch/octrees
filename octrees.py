@@ -1,5 +1,5 @@
 #    Octrees in Python
-#    Copyright (C) 2013--2019 James Cranch
+#    Copyright (C) 2013--2021 James Cranch
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 """
 A simple octree library
 
-(C) James Cranch 2013--2019
+(C) James Cranch 2013--2021
 
 Can be constructed in two ways:
   Octree(bounds) - an empty octree
