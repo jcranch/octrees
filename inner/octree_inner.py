@@ -85,7 +85,7 @@ class Empty(Tree):
     def insert(self, bounds, coords, data):
         return self.singleton(coords, data)
 
-    def update(self, bounds, coords, data):
+    def update(self, bounds, coords, data, replace=True):
         return self.singleton(coords, data)
 
     def remove(self, bounds, coords):
@@ -142,9 +142,12 @@ class Singleton(Tree):
             return self.node().insert(bounds, self.coords,
                                       self.data).insert(bounds, coords, data)
 
-    def update(self, bounds, coords, data):
+    def update(self, bounds, coords, data, replace=True):
         if self.coords == coords:
-            return self.singleton(coords, data)
+            if replace:
+                return self.singleton(coords, data)
+            else:
+                return self
         else:
             return self.node().insert(bounds, self.coords,
                                       self.data).insert(bounds, coords, data)
@@ -167,7 +170,7 @@ class Singleton(Tree):
             heapq.heappush(heap, (s, False, self.coords, self.data))
 
     def union(self, other, bounds, swapped=False):
-        return other.update(bounds, self.coords, self.data)
+        return other.update(bounds, self.coords, self.data, replace=swapped)
 
     def rebound(self, oldbounds, newbounds):
         if point_in_box(self.coords, newbounds):
@@ -189,71 +192,60 @@ class Node(Tree):
 
     def __init__(self, content=None):
         """
-        Takes either a list of eight octrees, or generators of two
-        nested three deep.
+        Takes either a generator of eight octrees, or generators of two
+        nested three deep (or None for an empty octree).
         """
         if content is None:
-            content = [self.empty()]*8
-        if len(content) == 8:
-            (a, b, c, d, e, f, g, h) = content
-            self.content = (((a, b), (c, d)), ((e, f), (g, h)))
+            content = (self.empty(),)*8
         else:
-            self.content = tuple(tuple(tuple(b) for b in a) for a in content)
+            content = tuple(content)
+            if len(content) == 2:
+                content = tuple(x for x in b for b in a for a in content)
+            if len(content) != 8:
+                raise ValueError("Content in unrecognised format")
+        self.content = content
 
     def __len__(self):
-        return sum(sum(sum(len(x) for x in b) for b in a)
-                   for a in self.content)
+        return sum(len(x) for x in self.content)
 
     def __iter__(self):
         for x in self.content:
-            for y in x:
-                for z in y:
-                    for t in iter(z):
-                        yield t
+            for t in iter(x):
+                yield t
 
     def __eq__(self, other):
         if isinstance(other, Node):
-            return self.content_array() == other.content_array()
+            return self.content == other.content
         else:
             return False
 
     def __hash__(self):
         return hash((self.node, content))
 
-    def content_array(self):
-        return [[list(b) for b in a] for a in self.content]
-
     def get(self, bounds, coords, default):
-        ((r, s, t), newbounds) = narrow(bounds, coords)
-        return self.content_array()[r][s][t].get(newbounds, coords, default)
+        (n, newbounds) = narrow(bounds, coords)
+        return self.content[n].get(newbounds, coords, default)
 
     def insert(self, bounds, coords, data):
-        a = self.content_array()
-        ((r, s, t), newbounds) = narrow(bounds, coords)
-        a[r][s][t] = a[r][s][t].insert(newbounds, coords, data)
+        a = list(self.content)
+        (n, newbounds) = narrow(bounds, coords)
+        a[n] = a[n].insert(newbounds, coords, data)
         return self.node(a)
 
-    def update(self, bounds, coords, data):
-        a = self.content_array()
-        ((r, s, t), newbounds) = narrow(bounds, coords)
-        a[r][s][t] = a[r][s][t].update(newbounds, coords, data)
+    def update(self, bounds, coords, data, replace=True):
+        a = list(self.content)
+        (n, newbounds) = narrow(bounds, coords)
+        a[n] = a[n].update(newbounds, coords, data, replace=replace)
         return self.node(a)
 
     def remove(self, bounds, coords):
-        a = self.content_array()
-        ((r, s, t), newbounds) = narrow(bounds, coords)
-        a[r][s][t] = a[r][s][t].remove(newbounds, coords)
+        a = list(self.content)
+        (n, newbounds) = narrow(bounds, coords)
+        a[n] = a[n].remove(newbounds, coords)
         return self.smartnode(a)
 
-    def children_no_bounds(self):
-        for u in self.content:
-            for v in u:
-                for w in v:
-                    yield w
-
     def children(self, bounds):
-        for (b, x) in zip(subboxes(bounds), self.children_no_bounds()):
-            yield (b, x)
+        return zip(subboxes(bounds), self.content)
 
     def subset(self, bounds, point_fn, box_fn):
         x = box_fn(bounds)
@@ -271,13 +263,15 @@ class Node(Tree):
             heapq.heappush(heap, (s, True, bounds, self))
 
     def union(self, other, bounds, swapped=False):
+        if not isinstance(other, Node):
+            return other.union(self, bounds, not swapped)
         if swapped:
-            return self.node([x.union(y, b)
-                              for (x, y, b) in zip(self.children_no_bounds(),
-                                                   other.children_no_bounds(),
-                                                   subboxes(bounds))])
+            return other.union(self, bounds, swapped=False)
         else:
-            return other.union(self, bounds, swapped=True)
+            return self.node([x.union(y, b)
+                              for (x, y, b) in zip(self.content,
+                                                   other.content,
+                                                   subboxes(bounds))])
 
     def rebound(self, oldbounds, newbounds):
         if box_contains(oldbounds, newbounds):

@@ -107,9 +107,8 @@ class Octree():
 
     def simple_union(self, other):
         """
-        Return the union of two octrees with the same bounds. When
-        there are points in both, one will overwrite the other (which
-        of the two remain is undefined).
+        Return the union of two octrees with the same bounds. Points in
+        the right will overwrite points in the left.
         """
         if self.bounds != other.bounds:
             raise ValueError("Bounds don't agree")

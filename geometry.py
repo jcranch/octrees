@@ -115,27 +115,25 @@ def narrow(bounds, coords):
     (midx,midy,midz) = centroid(bounds)
 
     (x, y, z) = coords
+    n = 0
 
     if x < midx:
-        r = 0
         newx = (minx, midx)
     else:
-        r = 1
+        n += 4
         newx = (midx, maxx)
     if y < midy:
-        s = 0
         newy = (miny, midy)
     else:
-        s = 1
+        n += 2
         newy = (midy, maxy)
     if z < midz:
-        t = 0
         newz = (minz, midz)
     else:
-        t = 1
+        n += 1
         newz = (midz, maxz)
 
-    return ((r, s, t), (newx, newy, newz))
+    return (n, (newx, newy, newz))
 
 
 def euclidean_point_point(p, q):

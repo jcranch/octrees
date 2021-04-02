@@ -196,7 +196,7 @@ class BlobNode(BlobTree, Node):
     def __init__(self, content=None):
         Node.__init__(self, content)
 
-        l = [a.extent() for a in self.children_no_bounds()]
+        l = [a.extent() for a in self.content]
         l = [a for a in l if a is not None]
         if len(l) == 0:
             e = None
@@ -216,7 +216,7 @@ class BlobNode(BlobTree, Node):
         a = box_fn(self.extent())
         if a is None:
             return self.smartnode([t.subset_by_extent(point_fn, box_fn)
-                                   for t in self.children_no_bounds()])
+                                   for t in self.content])
         elif a:
             return self
         else:
@@ -225,7 +225,7 @@ class BlobNode(BlobTree, Node):
     def iter_by_extent(self, point_fn, box_fn):
         a = box_fn(self.extent())
         if a is None:
-            for t in self.children_no_bounds():
+            for t in self.content:
                 for r in t.iter_by_extent(point_fn, box_fn):
                     yield r
         elif a:
@@ -239,7 +239,7 @@ class BlobNode(BlobTree, Node):
 
         Useful in a couple of algorithms.
         """
-        l = list(self.children_no_bounds())
+        l = list(self.content)
         s = sum(isinstance(x, BlobEmpty) for x in l)
         if s == 7:
             for x in l:
@@ -250,12 +250,12 @@ class BlobNode(BlobTree, Node):
 
     def possible_overlaps(self, other):
         o = other.intersection_with_box(self.extent()).reroot()
-        for s in self.children_no_bounds():
+        for s in self.content:
             for x in s.possible_overlaps(o):
                 yield x
 
     def by_possible_overlap(self, other):
-        for s in self.children_no_bounds():
+        for s in self.content:
             e = s.extent()
             if e is not None:
                 a = other.intersection_with_box(e).reroot()
@@ -264,7 +264,7 @@ class BlobNode(BlobTree, Node):
 
     def debug_description(self, indent):
         print("  "*indent + f"Node with extent {self.extent()}:")
-        for s in self.children_no_bounds():
+        for s in self.content:
             s.debug_description(indent+1)
 
 BlobTree.node = BlobNode
