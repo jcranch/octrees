@@ -32,8 +32,8 @@ directly.
 from functools import reduce
 import heapq
 
-from geometry import *
-from inner.misc import pivot
+from octrees.geometry import *
+from octrees.inner.misc import pivot
 
 
 class Tree(object):

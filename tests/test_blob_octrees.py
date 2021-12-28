@@ -24,8 +24,8 @@ Unit testing for the octrees library
 from unittest import TestCase
 from math import sin
 
-from blob_octrees import BlobOctree
-from geometry import *
+from octrees.blob_octrees import BlobOctree
+from octrees.geometry import *
 
 
 class BlobTests(TestCase):

@@ -21,8 +21,8 @@ Blob octrees
 (C) James Cranch 2013--2021
 """
 
-from geometry import *
-from inner.blob_octree_inner import *
+from octrees.geometry import *
+from octrees.inner.blob_octree_inner import *
 
 
 class BlobOctree(object):

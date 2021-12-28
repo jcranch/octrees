@@ -24,7 +24,7 @@ Unit testing for the octrees library
 import random
 from unittest import TestCase
 
-from geometry import *
+from octrees.geometry import *
 
 
 class GeometryTests(TestCase):

@@ -25,7 +25,7 @@ from unittest import TestCase
 from math import sin
 
 from octrees import Octree, octree_from_list
-from geometry import *
+from octrees.geometry import *
 
 
 class BasicTests(TestCase):
