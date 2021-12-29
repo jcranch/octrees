@@ -16,4 +16,5 @@ nosetests.xml
 
 # Package build directories
 build/
+dist/
 octrees.egg-info/
