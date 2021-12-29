@@ -31,8 +31,8 @@ directly.
 (C) James Cranch 2013--2021
 """
 
-from geometry import *
-from inner.octree_inner import *
+from octrees.geometry import *
+from octrees.inner.octree_inner import *
 
 
 class BlobTree(Tree):

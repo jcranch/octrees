@@ -27,8 +27,8 @@ Can be constructed in two ways:
 
 import heapq
 
-from geometry import *
-from inner.octree_inner import *
+from octrees.geometry import *
+from octrees.inner.octree_inner import *
 
 
 class Octree():
