@@ -13,3 +13,7 @@ __pycache__
 
 # Unit test / coverage reports
 nosetests.xml
+
+# Package build directories
+build/
+octrees.egg-info/

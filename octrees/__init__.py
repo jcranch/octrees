@@ -26,3 +26,5 @@ from octrees.octrees import Octree, octree_from_list
 from octrees.blob_octrees import BlobOctree
 
 import octrees.geometry
+
+VERSION = "0.1.0"
